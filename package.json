@@ -1,0 +1,31 @@
+{
+  "name": "crypto-bot",
+  "version": "0.0.1",
+  "description": "Automatic trading crypto bot",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node tests/buy.test.js && node tests/sell.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dimkl/crypto-bot.git"
+  },
+  "keywords": [
+    "crypto",
+    "trade",
+    "exchange",
+    "bot",
+    "bitstamp"
+  ],
+  "author": "Dimitris Klouvas <dimitris.klouvas@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dimkl/crypto-bot/issues"
+  },
+  "homepage": "https://github.com/dimkl/crypto-bot#readme",
+  "dependencies": {
+    "got": "^11.8.1",
+    "uuid": "^8.3.2"
+  }
+}
