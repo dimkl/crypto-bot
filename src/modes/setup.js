@@ -1,6 +1,6 @@
 const DB = require('../db');
 const { getAccountBalance, getCurrentValues, getHourlyValues } = require('../adapters/bitstamp');
-const { writeFile} = require('fs');
+const { appendFile} = require('fs');
 
 async function setup(currencyPair) {
   const [
@@ -23,7 +23,7 @@ async function setup(currencyPair) {
   
  await new Promise((resolve, reject)=>{
     const data = JSON.stringify({currentBid, currentAsk, open, hourlyBid, hourlyAsk, hourlyOpen});
-    writeFile(`${currencyPair}.jsonl`, data, (err) => err ? reject(err) : resolve());
+    appendFile(`${currencyPair}.jsonl`, data, (err) => err ? reject(err) : resolve());
  });
 }
 
