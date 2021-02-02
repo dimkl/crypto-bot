@@ -13,7 +13,7 @@ function markBought(state, { boughtValue, boughtAt, boughtAmount }) {
 }
 
 async function buyMode(currencyPair, config, state) {
-  const { changePercentage, comebackPercentage, tradePercentage } = config.buyMode;
+  const { changePercentage, comebackPercentage, tradePercentage } = config;
   const { currentBid, hourlyOpen, hourlyBid, capital, feePercentage = 0.0 } = DB[currencyPair];
   const { buying } = state;
 
