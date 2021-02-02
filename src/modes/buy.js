@@ -2,14 +2,14 @@ const DB = require('../db');
 const { hasDecreasedFor, hasIncreasedFor } = require('../helpers');
 const { buy } = require('../adapters/bitstamp');
 
-function markBuying(value, currencyPair) {
-  console.log('mark buying: ', { value, currencyPair, now: new Date() });
+function markBuying(currencyPair, value) {
+  // console.log('mark buying: ', { value, currencyPair, now: new Date() });
   Object.assign(DB[currencyPair].state, { buying: value });
 }
 
-function markBought(value, currencyPair) {
-  console.log('mark bought: ', { value, currencyPair, now: new Date() });
-  Object.assign(DB[currencyPair].state, { bought: value, buying: null });
+function markBought(currencyPair, { boughtValue, boughtAt, boughtAmount }) {
+  console.log('mark bought: ', { boughtValue, currencyPair, boughtAt, boughtAmount });
+  Object.assign(DB[currencyPair].state, { bought: boughtValue, created_at: boughtAt, amount: boughtAmount, buying: null });
 }
 
 async function buyMode(config) {
@@ -33,14 +33,15 @@ async function buyMode(config) {
   const percent = buying ? comebackPercentage : targetWithFee;
   const initial = buying ? buying : hourlyOpen;
   const bidHasDropped = currentBid < buying;
-
+  
   if (hasDecreasedFor(currentBid, initial, percent)) {
-    await markBuying(currentBid, currencyPair);
+    await markBuying(currencyPair, currentBid);
   } else if (buying && hasIncreasedFor(currentBid, buying, comebackPercentage)) {
-    const { boughtValue } = await buy(currentBid, tradePercentage, currencyPair);
-    await markBought(boughtValue, currencyPair);
+    const assetsToBuy = (tradePercentage * (parseFloat(currentBid) / parseFloat(capital))).toFixed(4);
+    const boughtParams = await buy(currentBid, assetsToBuy, currencyPair);
+    await markBought(currencyPair, boughtParams);
   } else if (bidHasDropped) {
-    await markBuying(currentBid, currencyPair);
+    await markBuying(currencyPair, currentBid);
   }
 }
 

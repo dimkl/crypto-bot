@@ -26,7 +26,7 @@ test("sell: when value rising, updates selling state with max value until comeba
     { currentAsk: 110, hourlyAsk: 100 },
     { currentAsk: 114, hourlyAsk: 100 },
     { currentAsk: 118, hourlyAsk: 100 },
-    { currentAsk: 108, hourlyAsk: 100 },
+    { currentAsk: 109, hourlyAsk: 100 },
     { currentAsk: 120, hourlyAsk: 100 },
     { currentAsk: 95, hourlyAsk: 100 },
   ];
@@ -34,10 +34,13 @@ test("sell: when value rising, updates selling state with max value until comeba
   for (const dt of data) {
     Object.assign(DB[config.currencyPair], dt);
     await sellMode(config);
+    
+    // end selling
+    if(DB[config.currencyPair].state.sold) DB[config.currencyPair].assets = 0;
   }
 
   const sellingExpectation = DB[config.currencyPair].state.selling === null;
-  const soldExpectation = DB[config.currencyPair].state.sold === 108;
-
+  const soldExpectation = DB[config.currencyPair].state.sold === 109;
+  
   return sellingExpectation && soldExpectation;
 });

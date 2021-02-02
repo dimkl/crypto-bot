@@ -8,22 +8,17 @@ async function setup(currencyPair) {
     { currentBid, currentAsk, open, vwap },
     { hourlyBid, hourlyAsk, hourlyOpen, hourlyVwap }
   ] = await Promise.all([
-    getAccountBalance(),
+    getAccountBalance(currencyPair),
     getCurrentValues(currencyPair),
     getHourlyValues(currencyPair)
   ]);
-  // Object.assign(DB, { assets, capital, currentBid, currentAsk, open, hourlyBid, hourlyAsk });
-  // temporarily ignore capital and assets from account balance
+  
   DB[currencyPair] = DB[currencyPair] || {};
-  Object.assign(DB[currencyPair], { currentBid, currentAsk, open, hourlyBid, hourlyAsk, hourlyOpen });
-  if (DB[currencyPair].assets == null || DB[currencyPair].capital == null) {
-    const config = require('../config');
-    Object.assign(DB[currencyPair], { assets: config.assets, capital: config.capital, feePercentage: config.feePercentage });
-  }
+  Object.assign(DB[currencyPair], { capital, assets, feePercentage, currentBid, currentAsk, open, hourlyBid, hourlyAsk, hourlyOpen });
   
  await new Promise((resolve, reject)=>{
     const data = JSON.stringify({currentBid, currentAsk, open, hourlyBid, hourlyAsk, hourlyOpen});
-    appendFile(`${currencyPair}.jsonl`, data, (err) => err ? reject(err) : resolve());
+    appendFile(`${currencyPair}.jsonl`, data+'\n', (err) => err ? reject(err) : resolve());
  });
 }
 

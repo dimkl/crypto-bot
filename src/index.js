@@ -1,6 +1,8 @@
 const config = require('./config');
 const { sellMode, buyMode, setupMode, snapshotDBMode } = require('./modes');
 
+console.log({env: process.env.NODE_ENV});
+
 setupMode(config.currencyPair).then(() => {
 	setInterval(() => setupMode(config.currencyPair), config.interval);
 	setInterval(() => sellMode(config), config.interval);

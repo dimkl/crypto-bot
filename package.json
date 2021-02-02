@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "test": "node tests/buy.test.js && node tests/sell.test.js"
+    "test": "NODE_ENV=test node tests/buy.test.js && NODE_ENV=test node tests/sell.test.js"
   },
   "repository": {
     "type": "git",

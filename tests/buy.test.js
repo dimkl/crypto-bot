@@ -34,6 +34,9 @@ test("buy: when value dropping, updates buying state with min value until comeba
   for (const dt of data) {
     Object.assign(DB[config.currencyPair], dt);
     await buyMode(config);
+    
+    // end buying
+    if(DB[config.currencyPair].state.bought) DB[config.currencyPair].capital = 0;
   }
 
   const buyingExpectation = DB[config.currencyPair].state.buying === null;
