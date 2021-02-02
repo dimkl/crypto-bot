@@ -1,6 +1,7 @@
 # My ignored files
 /db.json
 .env
+*.jsonl
 
 # Logs
 logs
