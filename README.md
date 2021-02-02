@@ -9,3 +9,4 @@ Automatic trading crypto bot
 - test sell & buy api calls using nock
 - add buy & sell e2e flow with mock data
 - add api key with permission to trade
+- allow multiple currency pair configuration
