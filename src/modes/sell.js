@@ -14,7 +14,7 @@ function markSold(state, value) {
 }
 
 async function sellMode(currencyPair, config, state) {
-  const { changePercentage, comebackPercentage, tradePercentage } = config.sellMode;
+  const { changePercentage, comebackPercentage, tradePercentage } = config;
   const { currentAsk, hourlyAsk, assets, feePercentage = 0.0 } = DB[currencyPair];
   const { selling, bought } = state;
 

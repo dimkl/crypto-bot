@@ -1,12 +1,11 @@
 const DB = require('../../src/db');
 const buyMode = require('../../src/modes/buy');
+
+const currencyPair = 'xlmeur';
 const config = {
-  buyMode: {
-    changePercentage: '0.1000',
-    comebackPercentage: '0.0200',
-    tradePercentage: '1.0000',
-  },
-  currencyPair: 'xlmeur'
+  changePercentage: '0.1000',
+  comebackPercentage: '0.0200',
+  tradePercentage: '1.0000',
 };
 
 describe("buy mode", () => {
@@ -15,8 +14,8 @@ describe("buy mode", () => {
   });
 
   test("buy: when value dropping, updates buying state with min value until comeback decrease from latest value", async () => {
-    DB[config.currencyPair] = DB[config.currencyPair] || {};
-    Object.assign(DB[config.currencyPair], { capital: 50, assets: 0 });
+    DB[currencyPair] = DB[currencyPair] || {};
+    Object.assign(DB[currencyPair], { capital: 50, assets: 0 });
 
     const data = [
       { currentBid: 114, hourlyOpen: 120, hourlyBid: 120 },
@@ -31,11 +30,11 @@ describe("buy mode", () => {
 
     const state = { buying: null, bought: null };
     for (const dt of data) {
-      Object.assign(DB[config.currencyPair], dt);
-      await buyMode(config.currencyPair, config, state);
+      Object.assign(DB[currencyPair], dt);
+      await buyMode(currencyPair, config, state);
 
       // end buying
-      if (state.bought) DB[config.currencyPair].capital = 0;
+      if (state.bought) DB[currencyPair].capital = 0;
     }
 
     expect(state.buying).toBeNull();

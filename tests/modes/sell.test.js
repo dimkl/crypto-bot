@@ -1,12 +1,11 @@
 const DB = require('../../src/db');
 const sellMode = require('../../src/modes/sell');
+
+const currencyPair = 'xlmeur';
 const config = {
-  sellMode: {
-    changePercentage: '0.1000',
-    comebackPercentage: '0.0200',
-    tradePercentage: '1.0000'
-  },
-  currencyPair: 'xlmeur'
+  changePercentage: '0.1000',
+  comebackPercentage: '0.0200',
+  tradePercentage: '1.0000'
 };
 
 describe("sell mode", () => {
@@ -15,8 +14,8 @@ describe("sell mode", () => {
   });
 
   test("sell: when value rising, updates selling state with max value until comeback decrease from latest value", async () => {
-    DB[config.currencyPair] = DB[config.currencyPair] || {};
-    Object.assign(DB[config.currencyPair], { capital: 0, assets: 50 });
+    DB[currencyPair] = DB[currencyPair] || {};
+    Object.assign(DB[currencyPair], { capital: 0, assets: 50 });
 
     const data = [
       { currentAsk: 98, hourlyAsk: 100 },
@@ -31,11 +30,11 @@ describe("sell mode", () => {
 
     const state = { selling: null, bought: 100 };
     for (const dt of data) {
-      Object.assign(DB[config.currencyPair], dt);
-      await sellMode(config.currencyPair, config, state);
+      Object.assign(DB[currencyPair], dt);
+      await sellMode(currencyPair, config, state);
 
       // end selling
-      if (state.sold) DB[config.currencyPair].assets = 0;
+      if (state.sold) DB[currencyPair].assets = 0;
     }
 
     expect(state.selling).toBeNull();

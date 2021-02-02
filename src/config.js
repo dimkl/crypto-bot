@@ -10,8 +10,6 @@ function makeModeConfig(trade, change, comeback) {
 
 const config = Object.freeze({
   currencyPair: 'xlmeur',
-  capital: 0.1,
-  assets: 0,
   interval: intervalSeconds(5),
   backupInterval: intervalSeconds(10),
   buyMode: makeModeConfig(50, 2, 0.5),
