@@ -17,7 +17,6 @@ describe("buy mode", () => {
   test("buy: when value dropping, updates buying state with min value until comeback decrease from latest value", async () => {
     DB[config.currencyPair] = DB[config.currencyPair] || {};
     Object.assign(DB[config.currencyPair], { capital: 50, assets: 0 });
-    Object.assign(DB[config.currencyPair].state, { buying: null, bought: null });
 
     const data = [
       { currentBid: 114, hourlyOpen: 120, hourlyBid: 120 },
@@ -30,16 +29,17 @@ describe("buy mode", () => {
       { currentBid: 94, hourlyOpen: 120, hourlyBid: 120 }
     ];
 
+    const state = { buying: null, bought: null };
     for (const dt of data) {
       Object.assign(DB[config.currencyPair], dt);
-      await buyMode(config);
+      await buyMode(config.currencyPair, config, state);
 
       // end buying
-      if (DB[config.currencyPair].state.bought) DB[config.currencyPair].capital = 0;
+      if (state.bought) DB[config.currencyPair].capital = 0;
     }
 
-    expect(DB[config.currencyPair].state.buying).toBeNull();
-    expect(DB[config.currencyPair].state.bought).toBe(100);
+    expect(state.buying).toBeNull();
+    expect(state.bought).toBe(100);
   });
 });
 

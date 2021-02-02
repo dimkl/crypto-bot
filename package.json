@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node -r dotenv/config src/index.js",
     "start:dev": "NODE_ENV=development node -r dotenv/config src/index.js",
+    "start:debug": "node inspect -r dotenv/config src/index.js",
     "test": "jest --coverage"
   },
   "repository": {

@@ -1,5 +1,6 @@
 const assert = require('assert');
 const crypto = require('crypto');
+const got = require('got');
 const { URL } = require('url');
 const { v4: uuidv4 } = require('uuid');
 
