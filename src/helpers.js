@@ -25,9 +25,14 @@ function hasDecreasedFor(current, initial, percent) {
   return change > 0 && change >= percent;
 }
 
+function isLive() {
+  return !["test", "development"].includes(process.env.NODE_ENV)
+}
+
 module.exports = {
   makePercentage,
   intervalSeconds,
+  isLive,
   sliceObject,
   getChangePercentage,
   hasIncreasedFor,

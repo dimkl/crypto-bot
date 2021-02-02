@@ -17,7 +17,6 @@ describe("sell mode", () => {
   test("sell: when value rising, updates selling state with max value until comeback decrease from latest value", async () => {
     DB[config.currencyPair] = DB[config.currencyPair] || {};
     Object.assign(DB[config.currencyPair], { capital: 0, assets: 50 });
-    Object.assign(DB[config.currencyPair].state, { selling: null, bought: 100 });
 
     const data = [
       { currentAsk: 98, hourlyAsk: 100 },
@@ -30,15 +29,16 @@ describe("sell mode", () => {
       { currentAsk: 95, hourlyAsk: 100 },
     ];
 
+    const state = { selling: null, bought: 100 };
     for (const dt of data) {
       Object.assign(DB[config.currencyPair], dt);
-      await sellMode(config);
+      await sellMode(config.currencyPair, config, state);
 
       // end selling
-      if (DB[config.currencyPair].state.sold) DB[config.currencyPair].assets = 0;
+      if (state.sold) DB[config.currencyPair].assets = 0;
     }
 
-    expect(DB[config.currencyPair].state.selling).toBeNull();
-    expect(DB[config.currencyPair].state.sold).toBe(109);
+    expect(state.selling).toBeNull();
+    expect(state.sold).toBe(109);
   });
 });

@@ -1,8 +1,8 @@
 const got = require('got');
 const { stringify } = require('querystring');
 const { authorizedRequest } = require('./authorization');
-const { getAvailableKeys, getFeeKey, isLive } = require('./helpers');
-const { makePercentage } = require('../../helpers');
+const { getAvailableKeys, getFeeKey } = require('./helpers');
+const { makePercentage, isLive } = require('../../helpers');
 
 const BASE_URL = 'https://www.bitstamp.net/api/v2';
 
