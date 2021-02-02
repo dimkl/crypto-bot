@@ -7,4 +7,8 @@ function getFeeKey(currencyPair) {
     return `${currencyPair}_fee`;
 }
 
-module.exports = { getFeeKey, getAvailableKeys };
+function isLive() {
+    return !["test", "development"].includes(process.env.NODE_ENV)
+}
+
+module.exports = { getFeeKey, getAvailableKeys, isLive };

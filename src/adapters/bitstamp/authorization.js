@@ -6,7 +6,7 @@ const { v4: uuidv4 } = require('uuid');
 const API_KEY = process.env.BITSTAMP_API_KEY;
 const API_SECRET = process.env.BITSTAMP_API_SECRET;
 
-function getAuthHeaders(includeContent) {
+function _getAuthHeaders(includeContent) {
     return {
         'x-auth': `BITSTAMP ${API_KEY}`,
         'x-auth-nonce': uuidv4(),
@@ -16,7 +16,7 @@ function getAuthHeaders(includeContent) {
     };
 }
 
-function getSignatureBody(httpVerb, url, headers, bodyStr = '') {
+function _getSignatureBody(httpVerb, url, headers, bodyStr = '') {
     const { host, pathname, query = "" } = new URL(url);
 
     const urlStr = httpVerb.toUpperCase() + host + pathname + query;
@@ -33,29 +33,35 @@ function getSignatureBody(httpVerb, url, headers, bodyStr = '') {
     return headers['x-auth'] + urlStr + headerStr + bodyStr;
 };
 
-function signHeaders(headers, content) {
-    headers['x-auth-signature'] = createSignature(content);
+function _signHeaders(headers, content) {
+    headers['x-auth-signature'] = _createSignature(content);
 }
 
-function createSignature(content) {
+function _createSignature(content) {
     const hmac = crypto.createHmac('sha256', API_SECRET);
     return hmac.update(content).digest('hex');
 }
 
-function verifyResponseSignature(headers, responseHeaders, responseContent) {
+function _verifyResponseSignature(headers, responseHeaders, responseContent) {
     const nonce = headers['x-auth-nonce'];
     const timestamp = headers['x-auth-timestamp'];
     const contentType = responseHeaders['content-type'];
 
-    const signature = createSignature(nonce + timestamp + contentType + responseContent);
+    const signature = _createSignature(nonce + timestamp + contentType + responseContent);
     const responseSignature = responseHeaders['x-server-auth-signature'];
 
     assert(signature === responseSignature, 'Signatures do not match');
 }
 
-module.exports = {
-    getAuthHeaders,
-    getSignatureBody,
-    signHeaders,
-    verifyResponseSignature,
+async function authorizedRequest(url, method, body) {
+    const headers = _getAuthHeaders(!!body);
+    const signatureContent = _getSignatureBody(method, url, headers, body);
+    _signHeaders(headers, signatureContent);
+
+    const { headers: responseHeaders, body: responseBody } = await got(url, { headers, method, body });
+    await _verifyResponseSignature(headers, responseHeaders, responseBody);
+
+    return { responseHeaders, responseBody };
 }
+
+module.exports = { authorizedRequest };
