@@ -112,17 +112,19 @@ async function getUserTransactions(currencyPair) {
         const [assetsKey, capitalKey] = splitCurrencies(currencyPair);
 
         const transactions = JSON.parse(responseBody);
-        return transactions.map(resp => ({
-            transactionId: resp.id,
-            orderId: resp.order_id,
-            transactionType: getTransactionType(resp.type),
-            capital: resp[capitalKey],
-            assets: resp[assetsKey],
-            feeAmount: resp.fee,
-            datetime: resp.datetime,
-            exchangeRate: resp[getExchangeRateKey(currencyPair)],
-            exchangeType: getExchangeType(resp[capitalKey])
-        }));
+        return transactions
+            .filter(t => t[getExchangeRateKey(currencyPair)])
+            .map(t => ({
+                transactionId: t.id,
+                orderId: t.order_id,
+                transactionType: getTransactionType(t.type),
+                capital: t[capitalKey],
+                assets: t[assetsKey],
+                feeAmount: t.fee,
+                datetime: t.datetime,
+                exchangeRate: t[getExchangeRateKey(currencyPair)],
+                exchangeType: getExchangeType(t[capitalKey])
+            }));
     } catch (err) {
         const { statusCode, body } = err.response;
         console.error({ statusCode, body });
