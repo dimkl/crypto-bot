@@ -7,13 +7,7 @@ module.exports = {
     "currentAsk": "",
     "hourlyBid": "",
     "hourlyAsk": "",
-    "hourlyOpen": "",
-    "state": {
-      "selling": "",
-      "sold": "",
-      "buying": "",
-      "bought": ""
-    }
+    "hourlyOpen": ""
   },
   "xrpeur": {
     "capital": null,
@@ -23,12 +17,6 @@ module.exports = {
     "currentAsk": "",
     "hourlyBid": "",
     "hourlyAsk": "",
-    "hourlyOpen": "",
-    "state": {
-      "selling": "",
-      "sold": "",
-      "buying": "",
-      "bought": ""
-    }
+    "hourlyOpen": ""
   }
 }

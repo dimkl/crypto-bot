@@ -2,6 +2,10 @@
 
 Automatic trading crypto bot
 
+## Bitstamp Docs
+
+see: https://www.bitstamp.net/api/
+
 ## TODO
 
 - support trade percentage

@@ -7,4 +7,18 @@ function getFeeKey(currencyPair) {
     return `${currencyPair}_fee`;
 }
 
-module.exports = { getFeeKey, getAvailableKeys };
+function getTransactionType(type){
+    const mapping = { 0: 'deposit', 1: 'withdrawl', 2: 'market_trade', 14: 'sub_account_transfer'};
+    return mapping[type];
+}
+
+function getExchangeRateKey(currencyPair){
+    return getAvailableKeys(currencyPair).join('_');
+}
+
+module.exports = { 
+    getFeeKey,
+    getAvailableKeys,
+    getTransactionType,
+    getExchangeRateKey
+};
