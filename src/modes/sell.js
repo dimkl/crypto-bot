@@ -2,7 +2,6 @@ const DB = require('../db');
 const { hasDecreasedFor, hasIncreasedFor } = require('../helpers');
 const { sell } = require('../adapters/bitstamp');
 
-
 function markSelling(state, value) {
   console.log('mark selling: ', { value, now: new Date() });
   Object.assign(state, { selling: value });
@@ -26,7 +25,7 @@ async function sellMode(currencyPair, config, state) {
     return;
   }
   if (!hasAssets) {
-    console.log('Not enough assets!');
+    console.log(`Not enough ${currencyPair} assets!`, state);
     return;
   }
 

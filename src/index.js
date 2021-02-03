@@ -7,6 +7,6 @@ const { sellMode, buyMode, setupMode, snapshotDBMode } = require('./modes');
 		setInterval(() => setupMode(currencyPair), config.interval);
 		setInterval(() => sellMode(currencyPair, config.buyMode, state), config.interval);
 		setInterval(() => buyMode(currencyPair, config.sellMode, state), config.interval);
-		setInterval(snapshotDBMode, config.backupInterval);
+		setInterval(snapshotDBMode, 2 * config.interval);
 	});
 })

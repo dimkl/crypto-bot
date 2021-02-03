@@ -25,7 +25,7 @@ async function buyMode(currencyPair, config, state) {
     return;
   }
   if (!hasCapital) {
-    console.log('Not enough capital!');
+    console.log(`Not enough ${currencyPair} capital!`,state, DB[currencyPair]);
     return;
   }
 

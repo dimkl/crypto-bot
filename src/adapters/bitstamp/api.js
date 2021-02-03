@@ -1,7 +1,7 @@
 const got = require('got');
 const { stringify } = require('querystring');
 const { authorizedRequest } = require('./authorization');
-const { getAvailableKeys, getFeeKey } = require('./helpers');
+const { getAvailableKeys, getFeeKey, getExchangeRateKey, getTransactionType } = require('./helpers');
 const { makePercentage, isLive } = require('../../helpers');
 
 const BASE_URL = 'https://www.bitstamp.net/api/v2';
@@ -63,7 +63,7 @@ async function sell(limitValue, assets, currencyPair) {
         console.error({ statusCode, body });
     }
 
-    return { orderId: '', soldValue: '', soldAt: '', soldAmount: '' };
+    return { orderId: '', soldValue: limitValue, soldAt: Date.noew(), soldAmount: assets };
 }
 
 async function buy(limitValue, assets, currencyPair) {
@@ -87,7 +87,41 @@ async function buy(limitValue, assets, currencyPair) {
         console.error({ statusCode, body });
     }
 
-    return { orderId: '', boughtValue: '', boughtAt: '' };
+    return { orderId: '', boughtValue: limitValue, boughtAt: Date.now(), boughtAmount: assets };
+}
+
+async function getUserTransactions(currencyPair){
+    if (!isLive()) {
+        return {};
+    }
+    
+    const url =`${BASE_URL}/user_transactions/`;
+    const method = 'POST';
+    
+    const body = stringify({ limit: 10 });
+
+    try {
+        const { responseBody } = await authorizedRequest(url, method, body);
+
+        const [assetKey, capitalKey] = getAvailableKeys(currencyPair);
+        
+        const transactions = JSON.parse(responseBody);
+        return transactions.map(resp => ({ 
+            transactionId: resp.id,
+            orderId: resp.order_id,
+            type: getTransactionType(resp.type),
+            capital: resp[capitalKey],
+            assets: resp[assetsKey],
+            feeAmount: resp.fee,
+            datetime: resp.datetime,
+            exchangeRate: resp[getExchangeRateKey(currencyPair)],
+       }));
+    } catch (err) {
+        const { statusCode, body } = err.response;
+        console.error({ statusCode, body });
+    }
+
+    return {}; 
 }
 
 module.exports = {
