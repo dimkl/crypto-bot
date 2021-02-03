@@ -2,9 +2,24 @@
 
 Automatic trading crypto bot
 
-## Bitstamp Docs
+## Bitstamp Api Docs
 
 see: https://www.bitstamp.net/api/
+
+## Requirements
+
+- Node
+- env: BITSTAMP_API_KEY, BITSTAMP_API_SECRET
+
+## How to run
+
+```bash
+export BITSTAMP_API_KEY='api_key' BITSTAMP_API_SECRET='api_secret'
+npm i
+npm start
+```
+
+## Development
 
 ## TODO
 
