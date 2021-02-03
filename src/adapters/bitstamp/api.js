@@ -133,11 +133,19 @@ async function getUserTransactions(currencyPair) {
     return {};
 }
 
+async function getUserLastBuyTransaction(currencyPair) {
+    const { assets, exchangeRate } = await getUserTransactions(currencyPair)
+        .filter(t => t.type == 'buy')
+        .shift();
+    return { assets, exchangeRate };
+}
+
 module.exports = {
     getAccountBalance,
     getCurrentValues,
     getHourlyValues,
     getUserTransactions,
+    getUserLastBuyTransaction,
     buy,
     sell,
 };

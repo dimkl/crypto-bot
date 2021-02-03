@@ -1,16 +1,23 @@
 const DB = require('../db');
-const { getAccountBalance, getCurrentValues, getHourlyValues } = require('../adapters/bitstamp');
+const {
+  getAccountBalance,
+  getCurrentValues,
+  getHourlyValues,
+  getUserLastBuyTransaction
+} = require('../adapters/bitstamp');
 const { appendFile } = require('fs');
 
 async function setup(currencyPair) {
   const [
     { assets, capital, feePercentage },
     { currentBid, currentAsk, open, vwap },
-    { hourlyBid, hourlyAsk, hourlyOpen, hourlyVwap }
+    { hourlyBid, hourlyAsk, hourlyOpen, hourlyVwap },
+    { assets: boughtAssets, exchangeRate }
   ] = await Promise.all([
     getAccountBalance(currencyPair),
     getCurrentValues(currencyPair),
-    getHourlyValues(currencyPair)
+    getHourlyValues(currencyPair),
+    getUserLastBuyTransaction(currencyPair)
   ]);
 
   DB[currencyPair] = DB[currencyPair] || {};
