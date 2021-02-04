@@ -12,7 +12,7 @@ async function setup(currencyPair) {
     { assets, capital, feePercentage },
     { currentBid, currentAsk, open, vwap },
     { hourlyBid, hourlyAsk, hourlyOpen, hourlyVwap },
-    { assets: boughtAssets, exchangeRate }
+    { assets: lastBoughtAssets, exchangeRate: lastBoughtBid }
   ] = await Promise.all([
     getAccountBalance(currencyPair),
     getCurrentValues(currencyPair),
@@ -21,7 +21,19 @@ async function setup(currencyPair) {
   ]);
 
   DB[currencyPair] = DB[currencyPair] || {};
-  Object.assign(DB[currencyPair], { capital, assets, feePercentage, currentBid, currentAsk, open, hourlyBid, hourlyAsk, hourlyOpen });
+  Object.assign(DB[currencyPair], {
+    capital,
+    assets,
+    feePercentage,
+    currentBid,
+    currentAsk,
+    open,
+    hourlyBid,
+    hourlyAsk,
+    hourlyOpen,
+    lastBoughtBid,
+    lastBoughtAssets
+  });
 
   await new Promise((resolve, reject) => {
     const data = JSON.stringify({ currentBid, currentAsk, open, hourlyBid, hourlyAsk, hourlyOpen });

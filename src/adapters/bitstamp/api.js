@@ -98,9 +98,7 @@ async function buy(limitValue, assets, currencyPair) {
 }
 
 async function getUserTransactions(currencyPair) {
-    if (!isLive()) {
-        return {};
-    }
+    if (!isLive()) return [];
 
     const url = `${BASE_URL}/user_transactions/`;
     const method = 'POST';
@@ -118,8 +116,8 @@ async function getUserTransactions(currencyPair) {
                 transactionId: t.id,
                 orderId: t.order_id,
                 transactionType: getTransactionType(t.type),
-                capital: t[capitalKey],
-                assets: t[assetsKey],
+                capital: Math.abs(t[capitalKey]),
+                assets: Math.abs(t[assetsKey]),
                 feeAmount: t.fee,
                 datetime: t.datetime,
                 exchangeRate: t[getExchangeRateKey(currencyPair)],
@@ -130,14 +128,14 @@ async function getUserTransactions(currencyPair) {
         console.error({ statusCode, body });
     }
 
-    return {};
+    return [];
 }
 
 async function getUserLastBuyTransaction(currencyPair) {
-    const { assets, exchangeRate } = await getUserTransactions(currencyPair)
-        .filter(t => t.type == 'buy')
-        .shift();
-    return { assets, exchangeRate };
+    if (!isLive()) return {};
+
+    const transactions = await getUserTransactions(currencyPair);
+    return transactions.filter(t => t.exchangeType == 'buy').shift();
 }
 
 module.exports = {

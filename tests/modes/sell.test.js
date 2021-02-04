@@ -15,7 +15,7 @@ describe("sell mode", () => {
 
   test("sell: when value rising, updates selling state with max value until comeback decrease from latest value", async () => {
     DB[currencyPair] = DB[currencyPair] || {};
-    Object.assign(DB[currencyPair], { capital: 0, assets: 50 });
+    Object.assign(DB[currencyPair], { capital: 0, assets: 50, lastBoughtBid: 100, lastBoughtAssets: 50 });
 
     const data = [
       { currentAsk: 98, hourlyAsk: 100 },
@@ -28,7 +28,7 @@ describe("sell mode", () => {
       { currentAsk: 95, hourlyAsk: 100 },
     ];
 
-    const state = { selling: null, bought: 100 };
+    const state = { selling: null };
     for (const dt of data) {
       Object.assign(DB[currencyPair], dt);
       await sellMode(currencyPair, config, state);
