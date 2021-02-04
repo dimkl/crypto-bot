@@ -1,7 +1,8 @@
 const config = require('./config');
 const { sellMode, buyMode, setupMode, snapshotDBMode } = require('./modes');
 
-['xrpeur', 'xlmeur'].map((currencyPair) => {
+// ['xrpeur', 'xlmeur', 'btceur', 'etheur', 'omgeur', 'ltceur'].map((currencyPair) => {
+['xrpeur', 'xlmeur', 'btceur'].map((currencyPair) => {
 	setInterval(() => {
 		setupMode(currencyPair).then(() => {
 			const state = {};
