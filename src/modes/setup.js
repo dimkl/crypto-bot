@@ -12,7 +12,7 @@ async function setup(currencyPair) {
     { assets, capital, feePercentage },
     { currentBid, currentAsk, open, vwap },
     { hourlyBid, hourlyAsk, hourlyOpen, hourlyVwap },
-    { assets: lastBoughtAssets, exchangeRate: lastBoughtBid }
+    { assets: lastBoughtAssets, exchangeRate: lastBoughtBid } = {}
   ] = await Promise.all([
     getAccountBalance(currencyPair),
     getCurrentValues(currencyPair),

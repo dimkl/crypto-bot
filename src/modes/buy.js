@@ -2,13 +2,13 @@ const DB = require('../db');
 const { hasDecreasedFor, hasIncreasedFor } = require('../helpers');
 const { buy } = require('../adapters/bitstamp');
 
-function markBuying(state, value) {
-  console.log('mark buying: ', { value, now: new Date() });
+function markBuying(currencyPair, state, value) {
+  // console.log('mark buying: ', { currencyPair, value, now: new Date() });
   Object.assign(state, { buying: value });
 }
 
-function markBought(state, { boughtValue, boughtAt, boughtAmount }) {
-  console.log('mark bought: ', { boughtValue, boughtAt, boughtAmount });
+function markBought(currencyPair, state, { boughtValue, boughtAt, boughtAmount }) {
+  console.log('mark bought: ', { currencyPair, now: new Date(), boughtValue, boughtAt, boughtAmount });
   Object.assign(state, { bought: boughtValue, created_at: boughtAt, amount: boughtAmount, buying: null });
 }
 
@@ -30,13 +30,13 @@ async function buyMode(currencyPair, config, state) {
   const bidHasDropped = currentBid < buying;
 
   if (hasDecreasedFor(currentBid, initial, percent)) {
-    await markBuying(state, currentBid);
+    await markBuying(currencyPair, state, currentBid);
   } else if (buying && hasIncreasedFor(currentBid, buying, comebackPercentage)) {
     const assetsToBuy = (tradePercentage * (parseFloat(currentBid) / parseFloat(capital))).toFixed(4);
     const boughtParams = await buy(currentBid, assetsToBuy, currencyPair);
-    await markBought(state, boughtParams);
+    await markBought(currencyPair, state, boughtParams);
   } else if (bidHasDropped) {
-    await markBuying(state, currentBid);
+    await markBuying(currencyPair, state, currentBid);
   }
 }
 
