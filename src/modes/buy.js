@@ -3,7 +3,7 @@ const { hasDecreasedFor, hasIncreasedFor } = require('../helpers');
 const { buy } = require('../adapters/bitstamp');
 
 function markBuying(state, value) {
-  // console.log('mark buying: ', { value,  now: new Date() });
+  console.log('mark buying: ', { value, now: new Date() });
   Object.assign(state, { buying: value });
 }
 
@@ -21,11 +21,7 @@ async function buyMode(currencyPair, config, state) {
   const targetWithFee = (parseFloat(changePercentage) + parseFloat(feePercentage)).toFixed(4);
   const hasCapital = capital > 0;
 
-  if (!isValueDropping) {
-    return;
-  }
-  if (!hasCapital) {
-    console.log(`Not enough ${currencyPair} capital!`,state, DB[currencyPair]);
+  if (!isValueDropping || !hasCapital) {
     return;
   }
 

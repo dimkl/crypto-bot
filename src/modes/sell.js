@@ -7,30 +7,26 @@ function markSelling(state, value) {
   Object.assign(state, { selling: value });
 }
 
-function markSold(state, value) {
-  console.log('mark sold: ', { value, now: new Date() });
+function markSold(state, value, amount) {
+  console.log('mark sold: ', { value, now: new Date(), amount });
   Object.assign(state, { sold: value, selling: null });
 }
 
 async function sellMode(currencyPair, config, state) {
   const { changePercentage, comebackPercentage, tradePercentage } = config;
-  const { currentAsk, hourlyAsk, assets, feePercentage = 0.0 } = DB[currencyPair];
-  const { selling, bought } = state;
+  const { currentAsk, hourlyAsk, assets, lastBoughtBid, lastBoughtAssets, feePercentage = 0.0 } = DB[currencyPair];
+  const { selling } = state;
 
   const isValueRising = currentAsk >= hourlyAsk;
   const targetWithFee = (parseFloat(changePercentage) + parseFloat(feePercentage)).toFixed(4);
   const hasAssets = assets > 0;
 
-  if (!isValueRising || !bought) {
-    return;
-  }
-  if (!hasAssets) {
-    console.log(`Not enough ${currencyPair} assets!`, state);
+  if (!isValueRising || !lastBoughtBid || !hasAssets) {
     return;
   }
 
   const percent = selling ? comebackPercentage : targetWithFee;
-  const initial = selling ? selling : bought;
+  const initial = selling ? selling : lastBoughtBid;
   const askHasRisen = currentAsk > selling;
 
   // TODO: consider using the hourlyAsk
@@ -38,8 +34,9 @@ async function sellMode(currencyPair, config, state) {
   if (hasIncreasedFor(currentAsk, initial, percent)) {
     await markSelling(state, currentAsk);
   } else if (selling && hasDecreasedFor(currentAsk, selling, comebackPercentage)) {
-    const { soldValue } = await sell(currentAsk, tradePercentage, currencyPair);
-    await markSold(state, soldValue);
+    const assetsToSell = (tradePercentage * lastBoughtAssets).toFixed(4);
+    const { soldValue, soldAmount } = await sell(currentAsk, assetsToSell, currencyPair);
+    await markSold(state, soldValue, soldAmount);
   } else if (askHasRisen) {
     await markSelling(state, currentAsk);
   }

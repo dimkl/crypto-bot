@@ -10,9 +10,8 @@ function makeModeConfig(trade, change, comeback) {
 
 const config = Object.freeze({
   interval: intervalSeconds(5),
-  backupInterval: intervalSeconds(10),
-  buyMode: makeModeConfig(50, 2, 0.5),
-  sellMode: makeModeConfig(50, 2, 0.5),
+  buyMode: makeModeConfig(75, 2, 0.5),
+  sellMode: makeModeConfig(75, 2, 0.5),
 });
 
 module.exports = config;
