@@ -1,23 +1,26 @@
-const { Balance, Price, Transaction } = require('../models');
+const { Balance, Price, Transaction, State } = require('../models');
 const { hasDecreasedFor, hasIncreasedFor } = require('../helpers');
 const { sell } = require('../adapters/bitstamp');
 
-function markSelling(state, value) {
-  console.log('mark selling: ', { value, now: new Date() });
-  Object.assign(state, { selling: value });
+function markSelling(currencyPair, value, amount) {
+  State.find({ currencyPair, mode: 'sell' })
+    .assign({ current: value, amount, updatedAt: new Date() })
+    .write();
 }
 
-function markSold(state, value, amount) {
+function markSold(currencyPair, value, amount) {
   console.log('mark sold: ', { value, now: new Date(), amount });
-  Object.assign(state, { sold: value, selling: null });
+  State.find({ currencyPair, mode: 'sell' })
+    .assign({ current: null, final: value, amount, updatedAt: new Date() })
+    .write();
 }
 
-async function sellMode(currencyPair, config, state) {
+async function sellMode(currencyPair, config) {
   const { changePercentage, comebackPercentage, tradePercentage } = config;
   const { currentAsk, hourlyAsk } = Price.find({ currencyPair }).value();
   const { assets, feePercentage } = Balance.find({ currencyPair }).value();
   const { assets: lastBoughtAssets, exchangeRate: lastBoughtBid } = Transaction.find({ currencyPair, type: 'buy' }).value();
-  const { selling } = state;
+  const { current: selling } = State.find({ currencyPair, mode: 'sell' }).value();
 
   const isValueRising = currentAsk >= hourlyAsk;
   const targetWithFee = (parseFloat(changePercentage) + parseFloat(feePercentage)).toFixed(4);
@@ -30,17 +33,17 @@ async function sellMode(currencyPair, config, state) {
   const percent = selling ? comebackPercentage : targetWithFee;
   const initial = selling ? selling : lastBoughtBid;
   const askHasRisen = currentAsk > selling;
+  const assetsToSell = (tradePercentage * lastBoughtAssets).toFixed(4);
 
   // TODO: consider using the hourlyAsk
 
   if (hasIncreasedFor(currentAsk, initial, percent)) {
-    await markSelling(state, currentAsk);
+    await markSelling(currencyPair, currentAsk, assetsToSell);
   } else if (selling && hasDecreasedFor(currentAsk, selling, comebackPercentage)) {
-    const assetsToSell = (tradePercentage * lastBoughtAssets).toFixed(4);
     const { soldValue, soldAmount } = await sell(currentAsk, assetsToSell, currencyPair);
-    await markSold(state, soldValue, soldAmount);
+    await markSold(currencyPair, soldValue, soldAmount);
   } else if (askHasRisen) {
-    await markSelling(state, currentAsk);
+    await markSelling(currencyPair, currentAsk, assetsToSell);
   }
 }
 

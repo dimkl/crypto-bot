@@ -3,4 +3,5 @@ module.exports = {
   Config: require('./config'),
   Price: require('./price'),
   Transaction: require('./transaction'),
+  State: require('./state'),
 };
