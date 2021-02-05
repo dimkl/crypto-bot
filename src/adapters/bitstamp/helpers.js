@@ -32,7 +32,8 @@ async function errorHandler(handler, defaultResponse = {}) {
         if (!statusCode) {
             console.error(err);
         } else {
-            console.error({ statusCode, body });
+            debugger;
+            console.log({ statusCode, body });
         }
         return defaultResponse;
     }
