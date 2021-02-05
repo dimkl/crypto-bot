@@ -23,11 +23,23 @@ function getExchangeType(capital) {
     return capital < 0 ? 'sell' : 'buy';
 }
 
+async function errorHandler(handler) {
+    try {
+        const response = await handler();
+        return response
+    } catch (err) {
+        const { statusCode, body } = err.response;
+        console.error({ statusCode, body });
+        return {};
+    }
+}
+
 module.exports = {
     splitCurrencies,
     getFeeKey,
     getAvailableKeys,
     getTransactionType,
     getExchangeRateKey,
-    getExchangeType
+    getExchangeType,
+    errorHandler
 };

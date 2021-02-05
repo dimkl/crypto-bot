@@ -1,53 +1,42 @@
-const got = require('got');
-const { stringify } = require('querystring');
-const { authorizedRequest } = require('./authorization');
+const SDK = require('bitstamp-sdk');
 const {
     getAvailableKeys,
     splitCurrencies,
     getFeeKey,
     getExchangeRateKey,
     getTransactionType,
-    getExchangeType
+    getExchangeType,
+    errorHandler
 } = require('./helpers');
 const { makePercentage, isLive } = require('../../helpers');
 
-const BASE_URL = 'https://www.bitstamp.net/api/v2';
+const api = SDK();
 
 async function getCurrentValues(currencyPair) {
-    const response = await got.get(`${BASE_URL}/ticker/${currencyPair}/`).json();
-    return { open: response.open, currentBid: response.bid, currentAsk: response.ask, vwap: response.vwap };
+    const { open, bid, ask, vwap } = await api.ticker({ currencyPair });
+    return { open, currentBid: bid, currentAsk: ask, vwap };
 }
 
 async function getHourlyValues(currencyPair) {
-    const response = await got.get(`${BASE_URL}/ticker_hour/${currencyPair}/`).json();
-    return { hourlyBid: response.bid, hourlyAsk: response.ask, hourlyOpen: response.open, hourlyVwap: response.vwap };
+    const { open, bid, ask, vwap } = await api.tickerHour({ currencyPair });
+    return { hourlyBid: bid, hourlyAsk: ask, hourlyOpen: open, hourlyVwap: vwap };
 }
 
 async function getAccountBalance(currencyPair) {
-    if (!isLive()) {
-        return { assets: '', capital: '', feePercentage: '' };
-    }
+    if (!isLive()) return {};
 
-    const url = `${BASE_URL}/balance/`;
-    const method = 'POST';
-
-    try {
-        const { responseBody } = await authorizedRequest(url, method);
+    return errorHandler(async () => {
+        const response = await api.balance();
 
         const [assetKey, capitalKey] = getAvailableKeys(currencyPair);
         const feeKey = getFeeKey(currencyPair);
 
-        const response = JSON.parse(responseBody);
         return {
             assets: response[assetKey],
             capital: response[capitalKey],
             feePercentage: makePercentage(response[feeKey])
         };
-    } catch (err) {
-        const { statusCode, body } = err.response;
-        console.error({ statusCode, body });
-        return { assets: '', capital: '', feePercentage: '' };
-    }
+    });
 }
 
 async function sell(limitValue, assets, currencyPair) {
@@ -55,22 +44,13 @@ async function sell(limitValue, assets, currencyPair) {
         return { soldAt: Date.now(), soldValue: limitValue, soldAmount: assets };
     }
 
-    const url = `${BASE_URL}/sell/${currencyPair}/`;
-    const method = 'POST';
+    return errorHandler(async () => {
+        const body = { amount: assets, price: limitValue, ioc_order: true };
+        const response = await api.sell({ currencyPair, ...body });
 
-    const body = stringify({ amount: assets, price: limitValue, ioc_order: true });
-
-    try {
-        const { responseBody } = await authorizedRequest(url, method, body);
-
-        const { id: orderId, datetime, price, amount } = JSON.parse(responseBody);
-        return { orderId, soldAt: datetime, soldValue: price, soldAmount: amount }
-    } catch (err) {
-        const { statusCode, body } = err.response;
-        console.error({ statusCode, body });
-    }
-
-    return { orderId: '', soldValue: limitValue, soldAt: Date.noew(), soldAmount: assets };
+        const { id: orderId, datetime, price, amount } = response;
+        return { orderId, soldAt: datetime, soldValue: price, soldAmount: amount };
+    });
 }
 
 async function buy(limitValue, assets, currencyPair) {
@@ -78,39 +58,24 @@ async function buy(limitValue, assets, currencyPair) {
         return { boughtAt: Date.now(), boughtValue: limitValue, boughtAmount: assets };
     }
 
-    const url = `${BASE_URL}/buy/${currencyPair}/`;
-    const method = 'POST';
+    return errorHandler(async () => {
+        const body = { amount: assets, price: limitValue, ioc_order: true };
+        const response = await api.buy({ currencyPair, ...body });
 
-    const body = stringify({ amount: assets, price: limitValue, ioc_order: true });
-
-    try {
-        const { responseBody } = await authorizedRequest(url, method, body);
-
-        const { id: orderId, datetime, price, amount } = JSON.parse(responseBody);
+        const { id: orderId, datetime, price, amount } = response;
         return { orderId, boughtAt: datetime, boughtValue: price, boughtAmount: amount }
-    } catch (err) {
-        debugger;
-        const { statusCode, body } = err.response;
-        console.error({ statusCode, body });
-    }
-
-    return { orderId: '', boughtValue: limitValue, boughtAt: Date.now(), boughtAmount: assets };
+    });
 }
 
 async function getUserTransactions(currencyPair) {
     if (!isLive()) return [];
 
-    const url = `${BASE_URL}/user_transactions/`;
-    const method = 'POST';
-    const body = stringify({ limit: 10 });
-
-    try {
-        const { responseBody } = await authorizedRequest(url, method, body);
+    return errorHandler(async () => {
+        const response = await api.userTransactions({ limit: 10 });
 
         const [assetsKey, capitalKey] = splitCurrencies(currencyPair);
 
-        const transactions = JSON.parse(responseBody);
-        return transactions
+        return response
             .filter(t => t[getExchangeRateKey(currencyPair)])
             .map(t => ({
                 transactionId: t.id,
@@ -123,12 +88,7 @@ async function getUserTransactions(currencyPair) {
                 exchangeRate: t[getExchangeRateKey(currencyPair)],
                 exchangeType: getExchangeType(t[capitalKey])
             }));
-    } catch (err) {
-        const { statusCode, body } = err.response;
-        console.error({ statusCode, body });
-    }
-
-    return [];
+    });
 }
 
 async function getUserLastBuyTransaction(currencyPair) {

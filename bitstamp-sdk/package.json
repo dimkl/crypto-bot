@@ -1,12 +1,9 @@
 {
-  "name": "crypto-bot",
+  "name": "bitstamp-sdk",
   "version": "0.0.1",
-  "description": "Automatic trading crypto bot",
-  "main": "src/index.js",
+  "description": "SDK for Bitstamp platform",
+  "main": "index.js",
   "scripts": {
-    "start": "node -r dotenv/config src/index.js",
-    "start:dev": "NODE_ENV=development node -r dotenv/config src/index.js",
-    "start:debug": "node inspect -r dotenv/config src/index.js",
     "test": "jest --coverage"
   },
   "repository": {
@@ -17,7 +14,7 @@
     "crypto",
     "trade",
     "exchange",
-    "bot",
+    "sdk",
     "bitstamp"
   ],
   "author": "Dimitris Klouvas <dimitris.klouvas@gmail.com>",
@@ -27,7 +24,6 @@
   },
   "homepage": "https://github.com/dimkl/crypto-bot#readme",
   "dependencies": {
-    "bitstamp-sdk": "file:./bitstamp-sdk",
     "got": "^11.8.1",
     "uuid": "^8.3.2"
   },
