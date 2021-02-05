@@ -1,5 +1,3 @@
-const { makeModeConfig, intervalSeconds, makePercentage } = require('../helpers');
-
 const low = require('lowdb')
 const FileSync = require('lowdb/adapters/FileSync')
 
