@@ -6,8 +6,8 @@ const { sellMode, buyMode, setupMode } = require('./modes');
 	setInterval(() => {
 		setupMode(currencyPair).then(() => {
 			const state = {};
-			sellMode(currencyPair, config.buyMode, state);
-			buyMode(currencyPair, config.sellMode, state);
+			// sellMode(currencyPair, config.buyMode, state);
+			// buyMode(currencyPair, config.sellMode, state);
 		});
 	}, config.interval);
 })

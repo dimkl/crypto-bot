@@ -1,12 +1,4 @@
-const { makePercentage, intervalSeconds } = require('./helpers');
-
-function makeModeConfig(trade, change, comeback) {
-  return {
-    tradePercentage: makePercentage(trade),
-    changePercentage: makePercentage(change),
-    comebackPercentage: makePercentage(comeback)
-  };
-}
+const { makeModeConfig, intervalSeconds } = require('./helpers');
 
 const config = Object.freeze({
   interval: intervalSeconds(5),
