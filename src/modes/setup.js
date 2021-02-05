@@ -1,4 +1,4 @@
-const { Balance, Price, Transaction } = require('../models');
+const { Balance, Price, Transaction, State } = require('../models');
 const db = require('../storage');
 const {
   getAccountBalance,
@@ -10,8 +10,16 @@ const { appendFile } = require('fs');
 
 const initialized = {};
 
+function stateExists(currencyPair, mode) {
+  return !!State.find({ currencyPair, mode }).value();
+}
+
+function stateCreate(currencyPair, mode) {
+  State.push({ currencyPair, mode, createdAt: new Date() }).write();
+}
+
 function initializeCurrencyPairs(currencyPair) {
-  const collections = ['transactions', 'prices', 'balance', 'config'];
+  const collections = ['transactions', 'prices', 'balance', 'config', 'state'];
   collections.forEach((collection) => {
     const exists = db.get(collection).find({ currencyPair }).value();
 
@@ -20,6 +28,11 @@ function initializeCurrencyPairs(currencyPair) {
         .push({ currencyPair })
         .write();
     }
+  });
+
+  // state model setup
+  ['buy', 'sell'].forEach(mode => {
+    if (!stateExists(currencyPair, mode)) stateCreate(currencyPair, mode);
   });
 
   initialized[currencyPair] = true;

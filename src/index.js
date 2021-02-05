@@ -11,9 +11,8 @@ const { sellMode, buyMode, setupMode } = require('./modes');
 
 	setInterval(() => {
 		setupMode(currencyPair).then(() => {
-			const state = {};
-			sellMode(currencyPair, sellConfig, state);
-			buyMode(currencyPair, buyConfig, state);
+			sellMode(currencyPair, sellConfig);
+			buyMode(currencyPair, buyConfig);
 		});
 	}, interval);
 })

@@ -28,8 +28,12 @@ async function errorHandler(handler) {
         const response = await handler();
         return response
     } catch (err) {
-        const { statusCode, body } = err.response;
-        console.error({ statusCode, body });
+        const { statusCode, body } = err.response || {};
+        if (!statusCode) {
+            console.error(err);
+        } else {
+            console.error({ statusCode, body });
+        }
         return {};
     }
 }
