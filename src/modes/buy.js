@@ -3,14 +3,14 @@ const { hasDecreasedFor, hasIncreasedFor } = require('../helpers');
 const { buy } = require('../adapters/bitstamp');
 
 function markBuying(currencyPair, value, amount) {
-  console.log('mark buying: ', { currencyPair, now: new Date(), amount });
+  console.log('mark buying: ', { currencyPair, value, now: new Date(), amount });
   State.find({ currencyPair, mode: 'buy' })
     .assign({ current: value, amount, updatedAt: new Date() })
     .write();
 }
 
 function markBought(currencyPair, value, amount) {
-  console.log('mark bought: ', { currencyPair, now: new Date(), amount });
+  console.log('mark bought: ', { currencyPair, value, now: new Date(), amount });
   State.find({ currencyPair, mode: 'buy' })
     .assign({ current: null, final: value, amount, updatedAt: new Date() })
     .write();

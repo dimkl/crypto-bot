@@ -23,7 +23,7 @@ function getExchangeType(capital) {
     return capital < 0 ? 'sell' : 'buy';
 }
 
-async function errorHandler(handler) {
+async function errorHandler(handler, defaultResponse = {}) {
     try {
         const response = await handler();
         return response
@@ -34,7 +34,7 @@ async function errorHandler(handler) {
         } else {
             console.error({ statusCode, body });
         }
-        return {};
+        return defaultResponse;
     }
 }
 
