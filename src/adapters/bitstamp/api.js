@@ -40,8 +40,9 @@ async function getAccountBalance(currencyPair) {
 }
 
 async function sell(limitValue, assets, currencyPair) {
+    const defaultResponse = { soldAt: Date.now(), soldValue: limitValue, soldAmount: assets };
     if (!isLive()) {
-        return { soldAt: Date.now(), soldValue: limitValue, soldAmount: assets };
+        return defaultResponse;
     }
 
     return errorHandler(async () => {
@@ -50,12 +51,13 @@ async function sell(limitValue, assets, currencyPair) {
 
         const { id: orderId, datetime, price, amount } = response;
         return { orderId, soldAt: datetime, soldValue: price, soldAmount: amount };
-    });
+    }, defaultResponse);
 }
 
 async function buy(limitValue, assets, currencyPair) {
+    const defaultResponse = { boughtAt: Date.now(), boughtValue: limitValue, boughtAmount: assets };
     if (!isLive()) {
-        return { boughtAt: Date.now(), boughtValue: limitValue, boughtAmount: assets };
+        return defaultResponse;
     }
 
     return errorHandler(async () => {
@@ -64,7 +66,7 @@ async function buy(limitValue, assets, currencyPair) {
 
         const { id: orderId, datetime, price, amount } = response;
         return { orderId, boughtAt: datetime, boughtValue: price, boughtAmount: amount }
-    });
+    }, defaultResponse);
 }
 
 async function getUserTransactions(currencyPair) {
