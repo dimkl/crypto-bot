@@ -22,21 +22,24 @@ async function getHourlyValues(currencyPair) {
     return { hourlyBid: bid, hourlyAsk: ask, hourlyOpen: open, hourlyVwap: vwap };
 }
 
-async function getAccountBalance(currencyPair) {
+async function getAccountBalance(...currencyPairs) {
     if (!isLive()) return {};
 
     return errorHandler(async () => {
         const response = await api.balance();
+        
+        return currencyPairs.reduce((acc, currencyPair) => {
+            const [assetKey, capitalKey] = getAvailableKeys(currencyPair);
+            const feeKey = getFeeKey(currencyPair);
 
-        const [assetKey, capitalKey] = getAvailableKeys(currencyPair);
-        const feeKey = getFeeKey(currencyPair);
-
-        return {
-            assets: response[assetKey],
-            capital: response[capitalKey],
-            feePercentage: makePercentage(response[feeKey])
-        };
-    });
+            acc[currencyPair] = {
+                assets: response[assetKey],
+                capital: response[capitalKey],
+                feePercentage: makePercentage(response[feeKey])
+            };
+            return acc;
+        }, {});
+    }, []);
 }
 
 async function sell(limitValue, assets, currencyPair) {
@@ -69,35 +72,42 @@ async function buy(limitValue, assets, currencyPair) {
     }, defaultResponse);
 }
 
-async function getUserTransactions(currencyPair) {
-    if (!isLive()) return [];
+async function getUserTransactions(...currencyPairs) {
+    if (!isLive()) return {};
 
     return errorHandler(async () => {
         const response = await api.userTransactions({ limit: 10 });
+        
+        return currencyPairs.reduce((acc, currencyPair) => {
+            const [assetsKey, capitalKey] = splitCurrencies(currencyPair);
 
-        const [assetsKey, capitalKey] = splitCurrencies(currencyPair);
-
-        return response
-            .filter(t => t[getExchangeRateKey(currencyPair)])
-            .map(t => ({
-                transactionId: t.id,
-                orderId: t.order_id,
-                transactionType: getTransactionType(t.type),
-                capital: Math.abs(t[capitalKey]),
-                assets: Math.abs(t[assetsKey]),
-                feeAmount: t.fee,
-                datetime: t.datetime,
-                exchangeRate: t[getExchangeRateKey(currencyPair)],
-                exchangeType: getExchangeType(t[capitalKey])
-            }));
+            acc[currencyPair] = response
+                .filter(t => t[getExchangeRateKey(currencyPair)])
+                .map(t => ({
+                    transactionId: t.id,
+                    orderId: t.order_id,
+                    transactionType: getTransactionType(t.type),
+                    capital: Math.abs(t[capitalKey]),
+                    assets: Math.abs(t[assetsKey]),
+                    feeAmount: t.fee,
+                    datetime: t.datetime,
+                    exchangeRate: t[getExchangeRateKey(currencyPair)],
+                    exchangeType: getExchangeType(t[capitalKey])
+                }));
+            return acc;
+        });
     });
 }
 
-async function getUserLastBuyTransaction(currencyPair) {
+async function getUserLastBuyTransaction(...currencyPairs) {
     if (!isLive()) return {};
+    
+    const transactionsPerCurrency = await getUserTransactions(currencyPairs);
+    Object.values(transactionsPerCurrency).forEach(transactions) =>
+        transactions.filter(t => t.exchangeType == 'buy').splice(1)
+    );
 
-    const transactions = await getUserTransactions(currencyPair);
-    return transactions.filter(t => t.exchangeType == 'buy').shift();
+    return transactionsPerCurrency;
 }
 
 module.exports = {
