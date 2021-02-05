@@ -1,5 +1,5 @@
 const config = require('./config');
-const { sellMode, buyMode, setupMode, snapshotDBMode } = require('./modes');
+const { sellMode, buyMode, setupMode } = require('./modes');
 
 // ['xrpeur', 'xlmeur', 'btceur', 'etheur', 'omgeur', 'ltceur'].map((currencyPair) => {
 ['xrpeur', 'xlmeur', 'btceur'].map((currencyPair) => {
@@ -11,4 +11,3 @@ const { sellMode, buyMode, setupMode, snapshotDBMode } = require('./modes');
 		});
 	}, config.interval);
 })
-setInterval(snapshotDBMode, 2 * config.interval);
