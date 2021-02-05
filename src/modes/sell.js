@@ -1,4 +1,4 @@
-const DB = require('../db');
+const { Balance, Price, Transaction } = require('../models');
 const { hasDecreasedFor, hasIncreasedFor } = require('../helpers');
 const { sell } = require('../adapters/bitstamp');
 
@@ -14,7 +14,9 @@ function markSold(state, value, amount) {
 
 async function sellMode(currencyPair, config, state) {
   const { changePercentage, comebackPercentage, tradePercentage } = config;
-  const { currentAsk, hourlyAsk, assets, lastBoughtBid, lastBoughtAssets, feePercentage = 0.0 } = DB[currencyPair];
+  const { currentAsk, hourlyAsk } = Price.find({ currencyPair }).value();
+  const { assets, feePercentage } = Balance.find({ currencyPair }).value();
+  const { assets: lastBoughtAssets, exchangeRate: lastBoughtBid } = Transaction.find({ currencyPair, type: 'buy' }).value();
   const { selling } = state;
 
   const isValueRising = currentAsk >= hourlyAsk;

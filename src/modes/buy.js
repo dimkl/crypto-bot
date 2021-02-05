@@ -1,9 +1,9 @@
-const DB = require('../db');
+const { Balance, Price } = require('../models');
 const { hasDecreasedFor, hasIncreasedFor } = require('../helpers');
 const { buy } = require('../adapters/bitstamp');
 
 function markBuying(currencyPair, state, value) {
-  // console.log('mark buying: ', { currencyPair, value, now: new Date() });
+  console.log('mark buying: ', { currencyPair, value, now: new Date() });
   Object.assign(state, { buying: value });
 }
 
@@ -14,7 +14,8 @@ function markBought(currencyPair, state, { boughtValue, boughtAt, boughtAmount }
 
 async function buyMode(currencyPair, config, state) {
   const { changePercentage, comebackPercentage, tradePercentage } = config;
-  const { currentBid, hourlyOpen, hourlyBid, capital, feePercentage = 0.0 } = DB[currencyPair];
+  const { currentBid, hourlyOpen, hourlyBid } = Price.find({ currencyPair }).value();
+  const { capital, feePercentage = 0.0 } = Balance.find({ currencyPair }).value();
   const { buying } = state;
 
   const isValueDropping = currentBid <= hourlyBid;
