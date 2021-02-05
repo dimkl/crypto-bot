@@ -29,6 +29,13 @@ function isLive() {
   return !["test", "development"].includes(process.env.NODE_ENV)
 }
 
+function makeModeConfig(trade, change, comeback) {
+  return {
+    tradePercentage: makePercentage(trade),
+    changePercentage: makePercentage(change),
+    comebackPercentage: makePercentage(comeback)
+  };
+}
 module.exports = {
   makePercentage,
   intervalSeconds,
@@ -36,5 +43,6 @@ module.exports = {
   sliceObject,
   getChangePercentage,
   hasIncreasedFor,
-  hasDecreasedFor
+  hasDecreasedFor,
+  makeModeConfig
 };

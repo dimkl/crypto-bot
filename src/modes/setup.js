@@ -1,4 +1,5 @@
-const DB = require('../db');
+const { Balance, Price, Transaction } = require('../models');
+const db = require('../storage');
 const {
   getAccountBalance,
   getCurrentValues,
@@ -6,6 +7,23 @@ const {
   getUserLastBuyTransaction
 } = require('../adapters/bitstamp');
 const { appendFile } = require('fs');
+
+const initialized = {};
+
+function initializeCurrencyPairs(currencyPair) {
+  const collections = ['transactions', 'prices', 'balance', 'config'];
+  collections.forEach((collection) => {
+    const exists = db.get(collection).find({ currencyPair }).value();
+
+    if (!exists) {
+      db.get(collection)
+        .push({ currencyPair })
+        .write();
+    }
+  });
+
+  initialized[currencyPair] = true;
+}
 
 async function setup(currencyPair) {
   const [
@@ -20,20 +38,21 @@ async function setup(currencyPair) {
     getUserLastBuyTransaction(currencyPair)
   ]);
 
-  DB[currencyPair] = DB[currencyPair] || {};
-  Object.assign(DB[currencyPair], {
-    capital,
-    assets,
-    feePercentage,
-    currentBid,
-    currentAsk,
-    open,
-    hourlyBid,
-    hourlyAsk,
-    hourlyOpen,
-    lastBoughtBid,
-    lastBoughtAssets
-  });
+  if (!initialized[currencyPair]) initializeCurrencyPairs(currencyPair);
+
+  Balance
+    .find({ currencyPair })
+    .assign({ capital, assets, feePercentage })
+    .write();
+  Price
+    .find({ currencyPair })
+    .assign({ currentBid, currentAsk, open, vwap })
+    .assign({ hourlyBid, hourlyAsk, hourlyOpen, hourlyVwap })
+    .write();
+  Transaction
+    .find({ currencyPair })
+    .assign({ type: 'buy', assets: lastBoughtAssets, exchangeRate: lastBoughtBid })
+    .write();
 
   await new Promise((resolve, reject) => {
     const data = JSON.stringify({ currentBid, currentAsk, open, hourlyBid, hourlyAsk, hourlyOpen });

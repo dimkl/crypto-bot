@@ -29,6 +29,7 @@
   "dependencies": {
     "bitstamp-sdk": "file:./bitstamp-sdk",
     "got": "^11.8.1",
+    "lowdb": "^1.0.0",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
