@@ -1,4 +1,4 @@
-const { Balance, Price, Transaction, State } = require('../../src/models');
+const { Balance, Price, Transaction, State, AuditLog } = require('../../src/models');
 const sellMode = require('../../src/modes/sell');
 
 const currencyPair = 'xlmeur';
@@ -18,8 +18,9 @@ describe("sell mode", () => {
     Price.remove({ currencyPair }).write();
     Transaction.remove({ currencyPair }).write();
     State.remove({ currencyPair }).write();
+    AuditLog.remove({ currencyPair, mode: 'sell' }).write();
 
-    // console.log = jest.fn();
+    console.log = jest.fn();
   });
 
   test("sell: when value rising, updates selling state with max value until comeback decrease from latest value", async () => {
@@ -50,5 +51,13 @@ describe("sell mode", () => {
     const state = getState();
     expect(state.final).toBe(109);
     expect(state.current).toBeNull();
+    const auditLog = AuditLog.find({ currencyPair, mode: 'sell' }).value();
+    expect(auditLog).toMatchObject({
+      createdAt: expect.anything(),
+      amount: "50.0000",
+      currencyPair: "xlmeur",
+      mode: "sell",
+      value: 109
+    });
   });
 });

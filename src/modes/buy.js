@@ -13,7 +13,9 @@ function markBought(currencyPair, value, amount) {
   State.find({ currencyPair, mode: 'buy' })
     .assign({ current: null, final: value, amount, updatedAt: new Date() })
     .write();
-  AuditLog.push({ currencyPair, value, amount, createdAt: new Date() });
+  AuditLog
+    .push({ mode: 'buy', currencyPair, value, amount, createdAt: new Date() })
+    .write();
 }
 
 async function buyMode(currencyPair, config) {
