@@ -30,14 +30,14 @@ describe("sell mode", () => {
     State.push({ currencyPair, mode: 'sell' }).write();
 
     const data = [
-      { currentAsk: 98, hourlyAsk: 100 },
-      { currentAsk: 108, hourlyAsk: 100 },
-      { currentAsk: 110, hourlyAsk: 100 },
-      { currentAsk: 114, hourlyAsk: 100 },
-      { currentAsk: 118, hourlyAsk: 100 },
-      { currentAsk: 109, hourlyAsk: 100 },
-      { currentAsk: 120, hourlyAsk: 100 },
-      { currentAsk: 95, hourlyAsk: 100 },
+      { currentAsk: 98, hourlyOpen: 100 },
+      { currentAsk: 108, hourlyOpen: 100 },
+      { currentAsk: 110, hourlyOpen: 100 },
+      { currentAsk: 114, hourlyOpen: 100 },
+      { currentAsk: 118, hourlyOpen: 100 },
+      { currentAsk: 109, hourlyOpen: 100 },
+      { currentAsk: 120, hourlyOpen: 100 },
+      { currentAsk: 95, hourlyOpen: 100 },
     ];
 
     for (const dt of data) {
