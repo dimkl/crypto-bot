@@ -90,7 +90,7 @@ async function getUserTransactions(currencyPair) {
                 exchangeRate: t[getExchangeRateKey(currencyPair)],
                 exchangeType: getExchangeType(t[capitalKey])
             }));
-    });
+    }, []);
 }
 
 async function getUserLastBuyTransaction(currencyPair) {
