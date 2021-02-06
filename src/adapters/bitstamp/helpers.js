@@ -29,11 +29,13 @@ async function errorHandler(handler, defaultResponse = {}) {
         return response
     } catch (err) {
         const { statusCode, body } = err.response || {};
-        if (!statusCode) {
-            console.error(err);
+        const { requestUrl } = err.request || {};
+        if (err.message.includes('Timeout')) {
+            console.log({ requestUrl, timings: err.timings });
+        } else if (statusCode) {
+            console.log({ requestUrl, statusCode, body });
         } else {
-            debugger;
-            console.log({ statusCode, body });
+            console.error(err);
         }
         return defaultResponse;
     }
