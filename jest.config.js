@@ -2,6 +2,7 @@ module.exports = {
   clearMocks: true,
   coverageDirectory: "coverage",
   coverageProvider: "v8",
+  globalSetup:"<rootDir>/jest.setup.js",
   coverageThreshold: {
     global: {
       branches: 80,
