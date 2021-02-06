@@ -1,8 +1,8 @@
 const assert = require('assert');
 const crypto = require('crypto');
-const got = require('got');
 const { URL } = require('url');
 const { v4: uuidv4 } = require('uuid');
+const client = require('./client');
 
 const API_KEY = process.env.BITSTAMP_API_KEY;
 const API_SECRET = process.env.BITSTAMP_API_SECRET;
@@ -59,7 +59,7 @@ async function authorizedRequest(url, method, body) {
     const signatureContent = _getSignatureBody(method, url, headers, body);
     _signHeaders(headers, signatureContent);
 
-    const { headers: responseHeaders, body: responseBody } = await got(url, { headers, method, body });
+    const { headers: responseHeaders, body: responseBody } = await client(url, { headers, method, body });
     await _verifyResponseSignature(headers, responseHeaders, responseBody);
 
     return { responseHeaders, responseBody };
