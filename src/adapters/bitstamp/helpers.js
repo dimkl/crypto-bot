@@ -31,7 +31,7 @@ async function errorHandler(handler, defaultResponse = {}) {
         const { statusCode, body } = err.response || {};
         const { requestUrl } = err.request || {};
         if (err.message.includes('Timeout')) {
-            console.log({ requestUrl, timings: err.timings });
+            console.log({ requestUrl, timings: JSON.stringify(err.timings) });
         } else if (statusCode) {
             console.log({ requestUrl, statusCode, body });
         } else {
