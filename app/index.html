@@ -1,0 +1,108 @@
+<html>
+  <head>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+  </head>
+  <body>
+    <canvas id="buyChart" width="400" height="400"></canvas>
+    <script>
+      var ctx = document.getElementById("buyChart").getContext("2d");
+      var chartColors = {
+        red: "rgb(255, 99, 132)",
+        orange: "rgb(255, 159, 64)",
+        yellow: "rgb(255, 205, 86)",
+        green: "rgb(75, 192, 192)",
+        blue: "rgb(54, 162, 235)",
+        purple: "rgb(153, 102, 255)",
+        grey: "rgb(201, 203, 207)",
+      };
+
+      const calculateMedian = (list) => {
+        const v = list.reduce((median, value) => {
+          return median
+            ? (parseFloat(median) + parseFloat(value)) / 2
+            : parseFloat(value);
+        });
+        return parseFloat(v).toFixed(4);
+      };
+
+      var queryParams = "step=300&limit=290";
+      fetch("https://www.bitstamp.net/api/v2/ohlc/xrpeur?" + queryParams)
+        .then((response) => response.json())
+        .then(({ data }) => {
+          // var transformed = data.ohlc.map((dt, index) => {
+          //   const median = calculateMedian([dt.open, dt.close]);
+          //   if (index % 6 == 0) {
+          //     hourly = dt.open;
+          //   }
+          //   return {
+          //     currentBid: median,
+          //     currentAsk: (parseFloat(median) * 1.01).toFixed(4),
+          //     hourlyOpen: hourly,
+          //   };
+          // });
+          // console.log(JSON.stringify(transformed));
+
+          var labels = data.ohlc.map((dt) =>
+            new Date(dt.timestamp * 1000).toISOString()
+          );
+          var highDataset = data.ohlc.map((dt) => dt.high);
+          var lowDataset = data.ohlc.map((dt) => dt.low);
+          var closeDataset = data.ohlc.map((dt) => dt.close);
+          var openDataset = data.ohlc.map((dt) => dt.open);
+          var openHourlyDataset = data.ohlc.reduce((acc, obj, index) => {
+            if (index % 6 == 0) acc.push(obj.open);
+            else acc.push(acc[acc.length - 1]);
+            return acc;
+          }, []);
+
+          var myChart = new Chart(ctx, {
+            type: "line",
+            data: {
+              labels,
+              datasets: [
+                {
+                  label: "High",
+                  data: highDataset,
+                  borderColor: chartColors.green,
+                  fill: false,
+                },
+                {
+                  label: "Low",
+                  data: lowDataset,
+                  borderColor: chartColors.red,
+                  fill: false,
+                },
+                {
+                  label: "Close",
+                  data: closeDataset,
+                  borderColor: chartColors.blue,
+                  fill: false,
+                },
+                {
+                  label: "Open",
+                  data: openDataset,
+                  borderColor: chartColors.yellow,
+                  fill: false,
+                },
+                {
+                  label: "Open Hourly",
+                  data: openHourlyDataset,
+                  borderColor: chartColors.grey,
+                  borderDash: [3,3],
+                  fill: false,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              title: { display: true, text: "XRP to Eur chart" },
+            },
+          });
+        });
+    </script>
+  </body>
+</html>
