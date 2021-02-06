@@ -19,7 +19,7 @@ function markSold(currencyPair, value, amount) {
 async function sellMode(currencyPair, config) {
   const { changePercentage, comebackPercentage, tradePercentage } = config;
   const { currentAsk, hourlyAsk } = Price.find({ currencyPair }).value();
-  const { assets, feePercentage } = Balance.find({ currencyPair }).value();
+  const { assets, feePercentage = 0.0 } = Balance.find({ currencyPair }).value();
   const { assets: lastBoughtAssets, exchangeRate: lastBoughtBid } = Transaction.find({ currencyPair, type: 'buy' }).value();
   const { current: selling } = State.find({ currencyPair, mode: 'sell' }).value();
 

@@ -1,4 +1,4 @@
-const { Balance, Price } = require('../../src/models');
+const { Balance, Price, State } = require('../../src/models');
 const buyMode = require('../../src/modes/buy');
 
 const currencyPair = 'xlmeur';
@@ -8,16 +8,23 @@ const config = {
   tradePercentage: '1.0000',
 };
 
+function getState() {
+  return State.find({ currencyPair, mode: 'buy' }).value();
+}
+
 describe("buy mode", () => {
   beforeAll(() => {
     Balance.remove({ currencyPair }).write();
     Price.remove({ currencyPair }).write();
+    State.remove({ currencyPair }).write();
+
     console.log = jest.fn();
   });
 
   test("buy: when value dropping, updates buying state with min value until comeback decrease from latest value", async () => {
     Balance.push({ currencyPair, capital: 50, assets: 0 }).write();
     Price.push({ currencyPair }).write();
+    State.push({ currencyPair, mode: 'buy' }).write();
 
     const data = [
       { currentBid: 114, hourlyOpen: 120, hourlyBid: 120 },
@@ -30,17 +37,17 @@ describe("buy mode", () => {
       { currentBid: 94, hourlyOpen: 120, hourlyBid: 120 }
     ];
 
-    const state = { buying: null, bought: null };
     for (const dt of data) {
       Price.find({ currencyPair }).assign(dt).write();
-      await buyMode(currencyPair, config, state);
+      await buyMode(currencyPair, config);
 
       // end buying
-      if (state.bought) Balance.find({ currencyPair }).assign({ capital: 0 }).write();
+      if (getState().final) Balance.find({ currencyPair }).assign({ capital: 0 }).write();
     }
 
-    expect(state.buying).toBeNull();
-    expect(state.bought).toBe(100);
+    const state = getState();
+    expect(state.current).toBeNull();
+    expect(state.final).toBe(100);
   });
 });
 

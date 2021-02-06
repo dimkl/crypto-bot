@@ -1,4 +1,4 @@
-const { Balance, Price, Transaction } = require('../../src/models');
+const { Balance, Price, Transaction, State } = require('../../src/models');
 const sellMode = require('../../src/modes/sell');
 
 const currencyPair = 'xlmeur';
@@ -8,18 +8,25 @@ const config = {
   tradePercentage: '1.0000'
 };
 
+function getState() {
+  return State.find({ currencyPair, mode: 'sell' }).value();
+}
+
 describe("sell mode", () => {
   beforeAll(() => {
     Balance.remove({ currencyPair }).write();
     Price.remove({ currencyPair }).write();
     Transaction.remove({ currencyPair }).write();
-    console.log = jest.fn();
+    State.remove({ currencyPair }).write();
+
+    // console.log = jest.fn();
   });
 
   test("sell: when value rising, updates selling state with max value until comeback decrease from latest value", async () => {
     Balance.push({ currencyPair, capital: 0, assets: 50 }).write();
     Price.push({ currencyPair }).write();
     Transaction.push({ currencyPair, type: 'buy', assets: 50, exchangeRate: 100 }).write();
+    State.push({ currencyPair, mode: 'sell' }).write();
 
     const data = [
       { currentAsk: 98, hourlyAsk: 100 },
@@ -32,16 +39,16 @@ describe("sell mode", () => {
       { currentAsk: 95, hourlyAsk: 100 },
     ];
 
-    const state = { selling: null };
     for (const dt of data) {
       Price.find({ currencyPair }).assign(dt).write();
-      await sellMode(currencyPair, config, state);
+      await sellMode(currencyPair, config);
 
       // end selling
-      if (state.sold) Balance.find({ currencyPair }).assign({ assets: 0 }).write();
+      if (getState().final) Balance.find({ currencyPair }).assign({ assets: 0 }).write();
     }
 
-    expect(state.selling).toBeNull();
-    expect(state.sold).toBe(109);
+    const state = getState();
+    expect(state.final).toBe(109);
+    expect(state.current).toBeNull();
   });
 });
