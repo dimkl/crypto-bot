@@ -28,6 +28,7 @@
   "homepage": "https://github.com/dimkl/crypto-bot#readme",
   "dependencies": {
     "bitstamp-sdk": "file:./bitstamp-sdk",
+    "cacheable-lookup": "^5.0.4",
     "got": "^11.8.1",
     "lowdb": "^1.0.0",
     "uuid": "^8.3.2"
