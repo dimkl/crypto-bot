@@ -28,14 +28,14 @@ describe("buy mode", () => {
     State.push({ currencyPair, mode: "buy" }).write();
 
     const data = [
-      { currentBid: 114, hourlyOpen: 120, hourlyBid: 120 },
-      { currentBid: 106, hourlyOpen: 120, hourlyBid: 120 },
-      { currentBid: 102, hourlyOpen: 120, hourlyBid: 120 },
-      { currentBid: 98, hourlyOpen: 120, hourlyBid: 120 },
-      { currentBid: 99, hourlyOpen: 120, hourlyBid: 120 },
-      { currentBid: 100, hourlyOpen: 120, hourlyBid: 120 },
-      { currentBid: 95, hourlyOpen: 120, hourlyBid: 120 },
-      { currentBid: 94, hourlyOpen: 120, hourlyBid: 120 }
+      { currentBid: 114, hourlyOpen: 120 },
+      { currentBid: 106, hourlyOpen: 120 },
+      { currentBid: 102, hourlyOpen: 120 },
+      { currentBid: 98, hourlyOpen: 120 },
+      { currentBid: 99, hourlyOpen: 120 },
+      { currentBid: 100, hourlyOpen: 120 },
+      { currentBid: 95, hourlyOpen: 120 },
+      { currentBid: 94, hourlyOpen: 120 }
     ];
 
     for (const dt of data) {

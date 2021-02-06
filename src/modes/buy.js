@@ -20,11 +20,11 @@ function markBought(currencyPair, value, amount) {
 
 async function buyMode(currencyPair, config) {
   const { changePercentage, comebackPercentage, tradePercentage } = config;
-  const { currentBid, hourlyOpen, hourlyBid } = Price.find({ currencyPair }).value();
+  const { currentBid, hourlyOpen } = Price.find({ currencyPair }).value();
   const { capital, feePercentage = 0.0 } = Balance.find({ currencyPair }).value();
   const { current: buying } = State.find({ currencyPair, mode: 'buy' }).value();
 
-  const isValueDropping = currentBid <= hourlyBid;
+  const isValueDropping = currentBid <= hourlyOpen;
   const targetWithFee = (parseFloat(changePercentage) + parseFloat(feePercentage)).toFixed(4);
   const hasCapital = capital > 0;
 
