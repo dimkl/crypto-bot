@@ -1,19 +1,19 @@
-const { Balance, Price, State } = require('../models');
+const { Balance, Price, State, AuditLog } = require('../models');
 const { hasDecreasedFor, hasIncreasedFor } = require('../helpers');
 const { buy } = require('../adapters/bitstamp');
 
 function markBuying(currencyPair, value, amount) {
   console.log('mark buying: ', { currencyPair, value, now: new Date(), amount });
   State.find({ currencyPair, mode: 'buy' })
-    .assign({ current: value, amount, updatedAt: new Date() })
+    .assign({ current: value, final: null, amount, updatedAt: new Date() })
     .write();
 }
 
 function markBought(currencyPair, value, amount) {
-  console.log('mark bought: ', { currencyPair, value, now: new Date(), amount });
   State.find({ currencyPair, mode: 'buy' })
     .assign({ current: null, final: value, amount, updatedAt: new Date() })
     .write();
+  AuditLog.push({ currencyPair, value, amount, createdAt: new Date() });
 }
 
 async function buyMode(currencyPair, config) {

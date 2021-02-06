@@ -4,4 +4,5 @@ module.exports = {
   Price: require('./price'),
   Transaction: require('./transaction'),
   State: require('./state'),
+  AuditLog: require('./auditLog'),
 };
