@@ -26,9 +26,13 @@ function camelCase(str) {
 }
 
 function createApiMethod({ path, method }) {
-  return (params) => {
+  return async (params) => {
     const url = `${BASE_URL}/${replaceAndRemovePathParams(path, params)}`;
-    return client(url, { method }).json();
+    const response = await client(url, { method }).json();
+
+    if (response.status === 'error') throw new Error(JSON.stringify(response));
+
+    return response;
   };
 }
 
@@ -36,7 +40,11 @@ function createAuthorizedApiMethod({ path, method }) {
   return async (params) => {
     const url = `${BASE_URL}/${replaceAndRemovePathParams(path, params)}`;
     const { responseBody } = await authorizedRequest(url, method, stringify(params));
-    return JSON.parse(responseBody);
+    const response = JSON.parse(responseBody);
+
+    if (response.status === 'error') throw new Error(JSON.stringify(response));
+
+    return response;
   };
 }
 

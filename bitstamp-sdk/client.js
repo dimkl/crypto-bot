@@ -5,7 +5,7 @@ const dnsCache = new CacheableLookup();
 
 module.exports = got.extend({
   dnsCache,
-  timeout: 2000,
+  timeout: 3000,
   retry: {
     limit: 1,
     methods: ['GET'],
