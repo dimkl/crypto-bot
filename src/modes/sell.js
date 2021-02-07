@@ -1,22 +1,7 @@
-const { Balance, Price, Transaction, State, AuditLog } = require('../models');
+const { Balance, Price, Transaction, State } = require('../models');
 const { hasDecreasedFor, hasIncreasedFor } = require('../helpers');
 const { sell } = require('../adapters/bitstamp');
-
-function markSelling(currencyPair, value, amount) {
-  console.log('mark selling: ', { currencyPair, value, now: new Date(), amount });
-  State.find({ currencyPair, mode: 'sell' })
-    .assign({ current: value, final: null, amount, updatedAt: new Date() })
-    .write();
-}
-
-function markSold(currencyPair, value, amount) {
-  State.find({ currencyPair, mode: 'sell' })
-    .assign({ current: null, final: value, amount, updatedAt: new Date() })
-    .write();
-  AuditLog
-    .push({ mode: 'sell', currencyPair, value, amount, createdAt: new Date() })
-    .write();
-}
+const { markSelling, markSold } = require('./helpers');
 
 async function sellMode(currencyPair, config) {
   const { changePercentage, comebackPercentage, tradePercentage } = config;
@@ -36,7 +21,10 @@ async function sellMode(currencyPair, config) {
   const percent = selling ? comebackPercentage : targetWithFee;
   const initial = selling ? selling : lastBoughtBid;
   const askHasRisen = currentAsk > selling;
-  const assetsToSell = (tradePercentage * lastBoughtAssets).toFixed(4);
+  // TODO: fix this, there seems to be an issue in bitstamp causing by the rounding
+  // and we cannot sell the whole amount of assets
+  const usefulTradePercentage = parseFloat(tradePercentage) - 0.0001;
+  const assetsToSell = (usefulTradePercentage * lastBoughtAssets).toFixed(4);
 
   // TODO: consider using the hourlyAsk
 

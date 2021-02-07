@@ -1,22 +1,7 @@
-const { Balance, Price, State, AuditLog } = require('../models');
+const { Balance, Price, State } = require('../models');
 const { hasDecreasedFor, hasIncreasedFor } = require('../helpers');
 const { buy } = require('../adapters/bitstamp');
-
-function markBuying(currencyPair, value, amount) {
-  console.log('mark buying: ', { currencyPair, value, now: new Date(), amount });
-  State.find({ currencyPair, mode: 'buy' })
-    .assign({ current: value, final: null, amount, updatedAt: new Date() })
-    .write();
-}
-
-function markBought(currencyPair, value, amount) {
-  State.find({ currencyPair, mode: 'buy' })
-    .assign({ current: null, final: value, amount, updatedAt: new Date() })
-    .write();
-  AuditLog
-    .push({ mode: 'buy', currencyPair, value, amount, createdAt: new Date() })
-    .write();
-}
+const { markBuying, markBought } = require('./helpers');
 
 async function buyMode(currencyPair, config) {
   const { changePercentage, comebackPercentage, tradePercentage } = config;
@@ -35,7 +20,8 @@ async function buyMode(currencyPair, config) {
   const percent = buying ? comebackPercentage : targetWithFee;
   const initial = buying ? buying : hourlyOpen;
   const bidHasDropped = currentBid < buying;
-  const assetsToBuy = (parseFloat(tradePercentage) * parseFloat(capital) / parseFloat(currentBid)).toFixed(4);
+  const usefulTradePercentage = parseFloat(tradePercentage) - parseFloat(feePercentage);
+  const assetsToBuy = (usefulTradePercentage * parseFloat(capital) / parseFloat(currentBid)).toFixed(4);
 
   if (!buying && hasDecreasedFor(currentBid, initial, percent)) {
     await markBuying(currencyPair, currentBid, assetsToBuy);
