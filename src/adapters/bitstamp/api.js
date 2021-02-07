@@ -46,7 +46,7 @@ async function sell(limitValue, assets, currencyPair) {
     }
 
     return errorHandler(async () => {
-        const body = { amount: assets, price: limitValue, ioc_order: true };
+        const body = { amount: assets, price: limitValue };
         const response = await api.sell({ currencyPair, ...body });
 
         const { id: orderId, datetime, price, amount } = response;
@@ -61,7 +61,7 @@ async function buy(limitValue, assets, currencyPair) {
     }
 
     return errorHandler(async () => {
-        const body = { amount: assets, price: limitValue, ioc_order: true };
+        const body = { amount: assets, price: limitValue };
         const response = await api.buy({ currencyPair, ...body });
 
         const { id: orderId, datetime, price, amount } = response;
