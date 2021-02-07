@@ -68,8 +68,8 @@ async function setup(currencyPair) {
     .write();
 
   await new Promise((resolve, reject) => {
-    const data = JSON.stringify({ currentBid, currentAsk, open, hourlyBid, hourlyAsk, hourlyOpen });
-    appendFile(`${currencyPair}.jsonl`, data + '\n', (err) => err ? reject(err) : resolve());
+    const data = JSON.stringify({ currentBid, currentAsk, open, hourlyBid, hourlyAsk, hourlyOpen, createdAt: Date.now() });
+    appendFile(`${currencyPair}.jsonl`, data + ',\n', (err) => err ? reject(err) : resolve());
   });
 }
 
