@@ -40,7 +40,7 @@ async function sellMode(currencyPair, config) {
 
   // TODO: consider using the hourlyAsk
 
-  if (hasIncreasedFor(currentAsk, initial, percent)) {
+  if (!selling && hasIncreasedFor(currentAsk, initial, percent)) {
     await markSelling(currencyPair, currentAsk, assetsToSell);
   } else if (selling && hasDecreasedFor(currentAsk, selling, comebackPercentage)) {
     const { soldValue, soldAmount } = await sell(currentAsk, assetsToSell, currencyPair);
