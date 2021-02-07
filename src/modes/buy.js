@@ -28,7 +28,7 @@ async function buyMode(currencyPair, config) {
   } else if (buying && hasIncreasedFor(currentBid, buying, comebackPercentage)) {
     const { boughtValue, boughtAmount } = await buy(currentBid, assetsToBuy, currencyPair);
     await markBought(currencyPair, boughtValue, boughtAmount);
-  } else if (bidHasDropped) {
+  } else if (buying && bidHasDropped) {
     await markBuying(currencyPair, currentBid, assetsToBuy);
   }
 }

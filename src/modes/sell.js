@@ -33,7 +33,7 @@ async function sellMode(currencyPair, config) {
   } else if (selling && hasDecreasedFor(currentAsk, selling, comebackPercentage)) {
     const { soldValue, soldAmount } = await sell(currentAsk, assetsToSell, currencyPair);
     await markSold(currencyPair, soldValue, soldAmount);
-  } else if (askHasRisen) {
+  } else if (selling && askHasRisen) {
     await markSelling(currencyPair, currentAsk, assetsToSell);
   }
 }
