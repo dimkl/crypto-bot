@@ -31,7 +31,7 @@ async function sellMode(currencyPair, config) {
   if (!selling && hasIncreasedFor(currentAsk, initial, percent)) {
     await markSelling(currencyPair, currentAsk, assetsToSell);
   } else if (selling && hasDecreasedFor(currentAsk, selling, comebackPercentage)) {
-    const { soldValue, soldAmount } = await sell(currentAsk, assetsToSell, currencyPair);
+    const { soldValue, soldAmount } = await sell((currentAsk * 0.999).toFixed(5), assetsToSell, currencyPair);
     await markSold(currencyPair, soldValue, soldAmount);
   } else if (selling && askHasRisen) {
     await markSelling(currencyPair, currentAsk, assetsToSell);
