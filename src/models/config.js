@@ -25,8 +25,8 @@ const Config = db.defaults({
     {
       currencyPair: 'omgeur',
       interval: intervalSeconds(5),
-      buyMode: makeModeConfig(50, 8, 1),
-      sellMode: makeModeConfig(50, 8, 2),
+      buyMode: makeModeConfig(100, 6, 1),
+      sellMode: makeModeConfig(100, 8, 2),
     }
   ]
 }).get('config');
