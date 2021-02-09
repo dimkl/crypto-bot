@@ -18,12 +18,11 @@ async function buyMode(currencyPair, config) {
   }
 
   const percent = buying ? comebackPercentage : targetWithFee;
-  const initial = buying ? buying : hourlyOpen;
   const bidHasDropped = currentBid < buying;
   const usefulTradePercentage = parseFloat(tradePercentage) - parseFloat(feePercentage) - 0.001;
   const assetsToBuy = (usefulTradePercentage * parseFloat(capital) / parseFloat(currentBid)).toFixed(4);
 
-  if (!buying && hasDecreasedFor(currentBid, initial, percent)) {
+  if (!buying && hasDecreasedFor(currentBid, hourlyOpen, percent)) {
     await markBuying(currencyPair, currentBid, assetsToBuy);
   } else if (buying && hasIncreasedFor(currentBid, buying, comebackPercentage)) {
     const { boughtValue, boughtAmount } = await buy((currentBid * 1.001).toFixed(5), assetsToBuy, currencyPair);

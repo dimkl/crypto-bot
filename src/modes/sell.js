@@ -1,5 +1,5 @@
 const { Balance, Price, Transaction, State } = require('../models');
-const { hasDecreasedFor, hasIncreasedFor } = require('../helpers');
+const { getChangePercentage, hasDecreasedFor, hasIncreasedFor } = require('../helpers');
 const { sell } = require('../adapters/bitstamp');
 const { markSelling, markSold } = require('./helpers');
 
@@ -13,13 +13,12 @@ async function sellMode(currencyPair, config) {
   const isValueRising = currentAsk >= hourlyOpen;
   const targetWithFee = (parseFloat(changePercentage) + parseFloat(feePercentage)).toFixed(4);
   const hasAssets = assets > 0;
-
+ 
   if (!isValueRising || !lastBoughtBid || !hasAssets) {
     return;
   }
 
   const percent = selling ? comebackPercentage : targetWithFee;
-  const initial = selling ? selling : lastBoughtBid;
   const askHasRisen = currentAsk > selling;
   // TODO: fix this, there seems to be an issue in bitstamp causing by the rounding
   // and we cannot sell the whole amount of assets
@@ -28,7 +27,7 @@ async function sellMode(currencyPair, config) {
 
   // TODO: consider using the hourlyAsk
 
-  if (!selling && hasIncreasedFor(currentAsk, initial, percent)) {
+  if (!selling && hasIncreasedFor(currentAsk, lastBoughtBid, percent)) {
     await markSelling(currencyPair, currentAsk, assetsToSell);
   } else if (selling && hasDecreasedFor(currentAsk, selling, comebackPercentage)) {
     const { soldValue, soldAmount } = await sell((currentAsk * 0.999).toFixed(5), assetsToSell, currencyPair);
