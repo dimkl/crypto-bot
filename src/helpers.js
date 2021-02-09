@@ -12,16 +12,16 @@ function sliceObject(obj, keys) {
 
 function getChangePercentage(initial, current) {
   if (!initial || !current) return 0;
-  return parseFloat((initial - current) / initial).toFixed(4);
+  return parseFloat((current - initial) / initial).toFixed(4);
 }
 
 function hasIncreasedFor(current, initial, percent) {
-  const change = getChangePercentage(current, initial);
+  const change = getChangePercentage(initial, current);
   return change > 0 && change >= percent;
 }
 
 function hasDecreasedFor(current, initial, percent) {
-  const change = getChangePercentage(initial, current);
+  const change = getChangePercentage(current, initial);
   return change > 0 && change >= percent;
 }
 
