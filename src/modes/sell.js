@@ -13,7 +13,7 @@ async function sellMode(currencyPair, config) {
   const isValueRising = currentAsk >= hourlyOpen;
   const targetWithFee = (parseFloat(changePercentage) + parseFloat(feePercentage)).toFixed(4);
   const hasAssets = assets > 0;
- 
+
   if (!isValueRising || !lastBoughtBid || !hasAssets) {
     return;
   }

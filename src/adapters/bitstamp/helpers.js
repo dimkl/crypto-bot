@@ -20,7 +20,7 @@ function getExchangeRateKey(currencyPair) {
 }
 
 function getExchangeType(capital) {
-    return capital < 0 ? 'sell' : 'buy';
+    return capital > 0 ? 'sell' : 'buy';
 }
 
 async function errorHandler(handler, defaultResponse = {}) {

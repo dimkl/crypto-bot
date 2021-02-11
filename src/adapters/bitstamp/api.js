@@ -97,7 +97,7 @@ async function getUserLastBuyTransaction(currencyPair) {
     if (!isLive()) return {};
 
     const transactions = await getUserTransactions(currencyPair);
-    return transactions.filter(t => t.exchangeType == 'sell').shift();
+    return transactions.filter(t => t.exchangeType == 'buy').shift();
 }
 
 module.exports = {
