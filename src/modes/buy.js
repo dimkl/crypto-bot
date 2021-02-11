@@ -3,6 +3,13 @@ const { hasDecreasedFor, hasIncreasedFor } = require('../helpers');
 const { buy } = require('../adapters/bitstamp');
 const { markBuying, markBought } = require('./helpers');
 
+function improveBuyOffer(value, assets) {
+  return {
+    value: (value * 1.001).toFixed(5),
+    assets: (assets * 0.9999).toFixed(4)
+  };
+}
+
 async function buyMode(currencyPair, config) {
   const { changePercentage, comebackPercentage, tradePercentage } = config;
   const { currentBid, hourlyOpen } = Price.find({ currencyPair }).value();
@@ -19,15 +26,24 @@ async function buyMode(currencyPair, config) {
 
   const percent = buying ? comebackPercentage : targetWithFee;
   const bidHasDropped = currentBid < buying;
-  const usefulTradePercentage = parseFloat(tradePercentage) - parseFloat(feePercentage) - 0.001;
-  const assetsToBuy = (usefulTradePercentage * parseFloat(capital) / parseFloat(currentBid)).toFixed(4);
 
-  if (!buying && hasDecreasedFor(currentBid, hourlyOpen, percent)) {
-    await markBuying(currencyPair, currentBid, assetsToBuy);
-  } else if (buying && hasIncreasedFor(currentBid, buying, comebackPercentage)) {
-    const { boughtValue, boughtAmount } = await buy((currentBid * 1.001).toFixed(5), assetsToBuy, currencyPair);
-    await markBought(currencyPair, boughtValue, boughtAmount);
-  } else if (buying && bidHasDropped) {
+  const usefulTradePercentage = parseFloat(tradePercentage) - parseFloat(feePercentage);
+  const tradeableAssets = usefulTradePercentage * parseFloat(capital) / parseFloat(currentBid)
+  const {
+    assets: assetsToBuy,
+    value: valueToBuy
+  } = improveBuyOffer(currentBid, tradeableAssets);
+
+  const targetProfitReached = hasDecreasedFor(currentBid, hourlyOpen, percent);
+  const recoveryReached = hasIncreasedFor(currentBid, buying, comebackPercentage);
+  if (buying) {
+    if (recoveryReached && targetProfitReached) {
+      const { boughtValue, boughtAmount } = await buy(valueToBuy, assetsToBuy, currencyPair);
+      await markBought(currencyPair, boughtValue, boughtAmount);
+    } else if (bidHasDropped) {
+      await markBuying(currencyPair, currentBid, assetsToBuy);
+    }
+  } else if (targetProfitReached) {
     await markBuying(currencyPair, currentBid, assetsToBuy);
   }
 }

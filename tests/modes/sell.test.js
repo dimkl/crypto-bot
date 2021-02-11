@@ -49,7 +49,7 @@ describe("sell mode", () => {
     }
 
     const state = getState();
-    expect(state.final).toBe(109);
+    expect(state.final).toBe("108.89100");
     expect(state.current).toBeNull();
     const auditLog = AuditLog.find({ currencyPair, mode: 'sell' }).value();
     expect(auditLog).toMatchObject({
@@ -57,7 +57,7 @@ describe("sell mode", () => {
       amount: "49.9950",
       currencyPair: "xlmeur",
       mode: "sell",
-      value: 109
+      value: "108.89100"
     });
   });
 });

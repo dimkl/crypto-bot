@@ -40,14 +40,14 @@ describe("buy mode", () => {
 
     const state = getState();
     expect(state.current).toBeNull();
-    expect(state.final).toBe("0.30720");
+    expect(state.final).toBe("0.30751");
     const auditLog = AuditLog.find({ currencyPair, mode: "buy" }).value();
     expect(auditLog).toMatchObject({
       createdAt: expect.anything(),
-      amount: "86.2630",
+      amount: "86.2544",
       currencyPair: "xlmeur",
       mode: "buy",
-      value: "0.30720"
+      value: "0.30751"
     });
   })
 });

@@ -1,7 +1,14 @@
 const { Balance, Price, Transaction, State } = require('../models');
-const { getChangePercentage, hasDecreasedFor, hasIncreasedFor } = require('../helpers');
+const { hasDecreasedFor, hasIncreasedFor } = require('../helpers');
 const { sell } = require('../adapters/bitstamp');
 const { markSelling, markSold } = require('./helpers');
+
+function improveSellOffer(value, assets) {
+  return {
+    value: (value * 0.999).toFixed(5),
+    assets: (assets * 0.9999).toFixed(4)
+  };
+}
 
 async function sellMode(currencyPair, config) {
   const { changePercentage, comebackPercentage, tradePercentage } = config;
@@ -22,17 +29,24 @@ async function sellMode(currencyPair, config) {
   const askHasRisen = currentAsk > selling;
   // TODO: fix this, there seems to be an issue in bitstamp causing by the rounding
   // and we cannot sell the whole amount of assets
-  const usefulTradePercentage = parseFloat(tradePercentage) - 0.0001;
-  const assetsToSell = (usefulTradePercentage * lastBoughtAssets).toFixed(4);
+  const tradeableAssets = tradePercentage * lastBoughtAssets;
+  const {
+    assets: assetsToSell,
+    value: valueToSell
+  } = improveSellOffer(currentAsk, tradeableAssets);
 
   // TODO: consider using the hourlyAsk
 
-  if (!selling && hasIncreasedFor(currentAsk, lastBoughtBid, percent)) {
-    await markSelling(currencyPair, currentAsk, assetsToSell);
-  } else if (selling && hasDecreasedFor(currentAsk, selling, comebackPercentage)) {
-    const { soldValue, soldAmount } = await sell((currentAsk * 0.999).toFixed(5), assetsToSell, currencyPair);
-    await markSold(currencyPair, soldValue, soldAmount);
-  } else if (selling && askHasRisen) {
+  const targetProfitReached = hasIncreasedFor(currentAsk, lastBoughtBid, percent);
+  const recoveryReached = hasDecreasedFor(currentAsk, selling, comebackPercentage);
+  if (selling) {
+    if (recoveryReached && targetProfitReached) {
+      const { soldValue, soldAmount } = await sell(valueToSell, assetsToSell, currencyPair);
+      await markSold(currencyPair, soldValue, soldAmount);
+    } else if (askHasRisen) {
+      await markSelling(currencyPair, currentAsk, assetsToSell);
+    }
+  } else if (targetProfitReached) {
     await markSelling(currencyPair, currentAsk, assetsToSell);
   }
 }
