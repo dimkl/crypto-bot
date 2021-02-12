@@ -44,7 +44,7 @@ describe("buy mode", () => {
     const auditLog = AuditLog.find({ currencyPair, mode: "buy" }).value();
     expect(auditLog).toMatchObject({
       createdAt: expect.anything(),
-      amount: "86.2544",
+      amount: "86.1768",
       currencyPair: "xlmeur",
       mode: "buy",
       value: "0.30751"
