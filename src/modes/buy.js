@@ -6,7 +6,7 @@ const { markBuying, markBought } = require('./helpers');
 function improveBuyOffer(value, assets) {
   return {
     value: (value * 1.001).toFixed(5),
-    assets: (assets * 0.9999).toFixed(4)
+    assets: (assets * 0.999).toFixed(4)
   };
 }
 

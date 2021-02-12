@@ -14,7 +14,7 @@ const Config = db.defaults({
       currencyPair: 'xrpeur',
       interval: intervalSeconds(5),
       buyMode: makeModeConfig(100, 4, 1),
-      sellMode: makeModeConfig(100, 4, 1),
+      sellMode: makeModeConfig(100, 4, 1.5),
     },
     {
       currencyPair: 'btceur',
