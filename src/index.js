@@ -1,5 +1,5 @@
 const { Config } = require('./models');
-const { sellMode, buyMode, setupMode } = require('./modes');
+const { sellMode, buyMode, syncMode } = require('./modes');
 
 // ['xrpeur', 'xlmeur', 'btceur', 'etheur', 'omgeur', 'ltceur'].map((currencyPair) => {
 ['xrpeur', 'xlmeur', 'omgeur', 'btceur'].map((currencyPair) => {
@@ -10,7 +10,7 @@ const { sellMode, buyMode, setupMode } = require('./modes');
 	}
 
 	setInterval(() => {
-		setupMode(currencyPair).then(() => {
+		syncMode(currencyPair).then(() => {
 			sellMode(currencyPair, sellConfig);
 			buyMode(currencyPair, buyConfig);
 		});

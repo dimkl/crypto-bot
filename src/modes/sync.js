@@ -38,16 +38,16 @@ function initializeCurrencyPairs(currencyPair) {
   initialized[currencyPair] = true;
 }
 
-async function setup(currencyPair) {
+async function sync(currencyPair) {
   const [
-    { assets, capital, feePercentage },
     { currentBid, currentAsk, open, vwap },
     { hourlyBid, hourlyAsk, hourlyOpen, hourlyVwap },
+    { assets, capital, feePercentage },
     { assets: lastBoughtAssets, exchangeRate: lastBoughtBid } = {}
   ] = await Promise.all([
-    getAccountBalance(currencyPair),
     getCurrentValues(currencyPair),
     getHourlyValues(currencyPair),
+    getAccountBalance(currencyPair),
     getUserLastBuyTransaction(currencyPair)
   ]);
 
@@ -73,4 +73,4 @@ async function setup(currencyPair) {
   });
 }
 
-module.exports = setup;
+module.exports = sync;
