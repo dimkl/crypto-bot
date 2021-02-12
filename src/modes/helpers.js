@@ -32,9 +32,35 @@ function markSold(currencyPair, value, amount) {
     .write();
 }
 
+function improveSellOffer(value, assets) {
+  return {
+    value: (value * 0.999).toFixed(5),
+    assets: (assets * 0.999).toFixed(4)
+  };
+}
+
+function hasEnoughToTrade(value, assets) {
+  return (value * assets) >= 25;
+}
+
+function improveBuyOffer(value, assets) {
+  return {
+    value: (value * 1.001).toFixed(5),
+    assets: (assets * 0.999).toFixed(4)
+  };
+}
+
+function hasEnoughToBuy(value) {
+  return value >= 25;
+}
+
 module.exports = {
   markSelling,
   markSold,
   markBuying,
-  markBought
+  markBought,
+  improveSellOffer,
+  hasEnoughToTrade,
+  improveBuyOffer,
+  hasEnoughToBuy
 };

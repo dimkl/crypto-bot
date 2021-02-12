@@ -1,14 +1,7 @@
 const { Balance, Price, State } = require('../models');
 const { hasDecreasedFor, hasIncreasedFor } = require('../helpers');
 const { buy } = require('../adapters/bitstamp');
-const { markBuying, markBought } = require('./helpers');
-
-function improveBuyOffer(value, assets) {
-  return {
-    value: (value * 1.001).toFixed(5),
-    assets: (assets * 0.999).toFixed(4)
-  };
-}
+const { markBuying, markBought, improveBuyOffer, hasEnoughToTrade } = require('./helpers');
 
 async function buyMode(currencyPair, config) {
   const { changePercentage, comebackPercentage, tradePercentage } = config;
@@ -20,9 +13,7 @@ async function buyMode(currencyPair, config) {
   const targetWithFee = (parseFloat(changePercentage) + parseFloat(feePercentage)).toFixed(4);
   const hasCapital = capital > 0;
 
-  if (!isValueDropping || !hasCapital) {
-    return;
-  }
+  if (!isValueDropping || !hasCapital) return;
 
   const percent = buying ? comebackPercentage : targetWithFee;
   const bidHasDropped = currentBid < buying;
@@ -33,6 +24,8 @@ async function buyMode(currencyPair, config) {
     assets: assetsToBuy,
     value: valueToBuy
   } = improveBuyOffer(currentBid, tradeableAssets);
+
+  if (!hasEnoughToTrade(valueToBuy, assetsToBuy)) return;
 
   const targetProfitReached = hasDecreasedFor(currentBid, hourlyOpen, percent);
   const recoveryReached = hasIncreasedFor(currentBid, buying, comebackPercentage);
@@ -47,6 +40,5 @@ async function buyMode(currencyPair, config) {
     await markBuying(currencyPair, currentBid, assetsToBuy);
   }
 }
-
 
 module.exports = buyMode;

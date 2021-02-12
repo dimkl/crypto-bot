@@ -1,18 +1,7 @@
 const { Balance, Price, Transaction, State } = require('../models');
 const { hasDecreasedFor, hasIncreasedFor } = require('../helpers');
 const { sell } = require('../adapters/bitstamp');
-const { markSelling, markSold } = require('./helpers');
-
-function improveSellOffer(value, assets) {
-  return {
-    value: (value * 0.999).toFixed(5),
-    assets: (assets * 0.999).toFixed(4)
-  };
-}
-
-function hasEnoughToSell(value, assets){
-    return (value * assets) >= 25;
-}
+const { markSelling, markSold, improveSellOffer, hasEnoughToTrade } = require('./helpers');
 
 async function sellMode(currencyPair, config) {
   const { changePercentage, comebackPercentage, tradePercentage } = config;
@@ -38,8 +27,8 @@ async function sellMode(currencyPair, config) {
   } = improveSellOffer(currentAsk, tradeableAssets);
 
   // TODO: consider using the hourlyAsk
-  
-  if (!hasEnoughToSell(valueToSell, assetsToSell)) return;
+
+  if (!hasEnoughToTrade(valueToSell, assetsToSell)) return;
 
   const targetProfitReached = hasIncreasedFor(currentAsk, lastBoughtBid, percent);
   const recoveryReached = hasDecreasedFor(currentAsk, selling, comebackPercentage);
