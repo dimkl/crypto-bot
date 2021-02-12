@@ -34,33 +34,30 @@ function _getSignatureBody(httpVerb, url, headers, bodyStr = '') {
     return headers['x-auth'] + urlStr + headerStr + bodyStr;
 };
 
-function _signHeaders(headers, content) {
-    headers['x-auth-signature'] = _createSignature(content);
-}
-
-function _createSignature(content) {
-    const hmac = crypto.createHmac('sha256', API_SECRET);
+function _createSignature(content, apiSecret = API_SECRET) {
+    const hmac = crypto.createHmac('sha256', apiSecret);
     return hmac.update(content).digest('hex');
 }
 
-function _verifyResponseSignature(headers, responseHeaders, responseContent) {
+function _verifyResponseSignature(headers, responseHeaders, responseContent, apiSecret) {
     const nonce = headers['x-auth-nonce'];
     const timestamp = headers['x-auth-timestamp'];
     const contentType = responseHeaders['content-type'];
 
-    const signature = _createSignature(nonce + timestamp + contentType + responseContent);
+    const signatureContent = nonce + timestamp + contentType + responseContent;
+    const signature = _createSignature(signatureContent, apiSecret);
     const responseSignature = responseHeaders['x-server-auth-signature'];
 
     assert(signature === responseSignature, 'Signatures do not match');
 }
 
-async function authorizedRequest(url, method, body) {
-    const headers = _getAuthHeaders(!!body);
+async function authorizedRequest(url, method, body, { apiKey, apiSecret } = {}) {
+    const headers = _getAuthHeaders(!!body, apiKey);
     const signatureContent = _getSignatureBody(method, url, headers, body);
-    _signHeaders(headers, signatureContent);
+    headers['x-auth-signature'] = _createSignature(signatureContent, apiSecret);
 
     const { headers: responseHeaders, body: responseBody } = await client(url, { headers, method, body });
-    await _verifyResponseSignature(headers, responseHeaders, responseBody);
+    await _verifyResponseSignature(headers, responseHeaders, responseBody, apiSecret);
 
     return { responseHeaders, responseBody };
 }

@@ -36,10 +36,10 @@ function createApiMethod({ path, method }) {
   };
 }
 
-function createAuthorizedApiMethod({ path, method }) {
+function createAuthorizedApiMethod({ path, method }, { apiKey, apiSecret } = {}) {
   return async (params) => {
     const url = `${BASE_URL}/${replaceAndRemovePathParams(path, params)}`;
-    const { responseBody } = await authorizedRequest(url, method, stringify(params));
+    const { responseBody } = await authorizedRequest(url, method, stringify(params), { apiKey, apiSecret });
     const response = JSON.parse(responseBody);
 
     if (response.status === 'error') throw new Error(JSON.stringify(response));
@@ -48,10 +48,10 @@ function createAuthorizedApiMethod({ path, method }) {
   };
 }
 
-module.exports = function Api() {
+module.exports = function Api(options = {}) {
   return ENDPOINTS.reduce((api, apiConfig) => {
     const factory = apiConfig.authorized ? createAuthorizedApiMethod : createApiMethod;
     const name = camelCase(apiConfig.path.split('/').shift());
-    return { ...api, [name]: factory(apiConfig) };
+    return { ...api, [name]: factory(apiConfig, options) };
   }, {});
 };
