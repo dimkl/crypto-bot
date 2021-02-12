@@ -28,11 +28,13 @@ describe("buy mode", () => {
       changePercentage: "0.0500",
       comebackPercentage: "0.0100",
       tradePercentage: "1.0000",
+      apiKey: 'deadbeefKey',
+      apiSecret: 'deadbeefSecret',
     };
 
     for (const dt of data) {
       Price.find({ currencyPair }).assign(dt).write();
-      await buyMode(currencyPair, config);
+      await buyMode({ currencyPair, ...config });
 
       // end buying
       if (getState().final) Balance.find({ currencyPair }).assign({ capital: 0 }).write();

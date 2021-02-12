@@ -1,11 +1,6 @@
 const { Balance, Price, Transaction, State } = require('../models');
 const db = require('../storage');
-const {
-  getAccountBalance,
-  getCurrentValues,
-  getHourlyValues,
-  getUserLastBuyTransaction
-} = require('../adapters/bitstamp');
+const Api = require('../adapters/bitstamp');
 const { appendFile } = require('fs');
 
 const initialized = {};
@@ -38,17 +33,20 @@ function initializeCurrencyPairs(currencyPair) {
   initialized[currencyPair] = true;
 }
 
-async function sync(currencyPair) {
+async function sync(config) {
+  const { currencyPair, ...authConfig } = config;
+
+  const api = Api.getInstance({ currencyPair, ...authConfig });
   const [
     { currentBid, currentAsk, open, vwap },
     { hourlyBid, hourlyAsk, hourlyOpen, hourlyVwap },
     { assets, capital, feePercentage },
     { assets: lastBoughtAssets, exchangeRate: lastBoughtBid } = {}
   ] = await Promise.all([
-    getCurrentValues(currencyPair),
-    getHourlyValues(currencyPair),
-    getAccountBalance(currencyPair),
-    getUserLastBuyTransaction(currencyPair)
+    api.getCurrentValues(),
+    api.getHourlyValues(),
+    api.getAccountBalance(),
+    api.getUserLastBuyTransaction()
   ]);
 
   if (!initialized[currencyPair]) initializeCurrencyPairs(currencyPair);

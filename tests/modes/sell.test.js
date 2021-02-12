@@ -2,11 +2,7 @@ const { Balance, Price, Transaction, State, AuditLog } = require('../../src/mode
 const sellMode = require('../../src/modes/sell');
 
 const currencyPair = 'xlmeur';
-const config = {
-  changePercentage: '0.1000',
-  comebackPercentage: '0.0200',
-  tradePercentage: '1.0000'
-};
+
 
 function getState() {
   return State.find({ currencyPair, mode: 'sell' }).value();
@@ -29,6 +25,14 @@ describe("sell mode", () => {
     Transaction.push({ currencyPair, type: 'buy', assets: 50, exchangeRate: 100 }).write();
     State.push({ currencyPair, mode: 'sell' }).write();
 
+    const config = {
+      changePercentage: '0.1000',
+      comebackPercentage: '0.0200',
+      tradePercentage: '1.0000',
+      apiKey: 'deadbeefKey',
+      apiSecret: 'deadbeefSecret',
+    };
+
     const data = [
       { currentAsk: 98, hourlyOpen: 100 },
       { currentAsk: 108, hourlyOpen: 100 },
@@ -42,7 +46,7 @@ describe("sell mode", () => {
 
     for (const dt of data) {
       Price.find({ currencyPair }).assign(dt).write();
-      await sellMode(currencyPair, config);
+      await sellMode({ currencyPair, ...config });
 
       // end selling
       if (getState().final) Balance.find({ currencyPair }).assign({ assets: 0 }).write();

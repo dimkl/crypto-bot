@@ -1,10 +1,10 @@
 const { Balance, Price, Transaction, State } = require('../models');
 const { hasDecreasedFor, hasIncreasedFor } = require('../helpers');
-const { sell } = require('../adapters/bitstamp');
+const Api = require('../adapters/bitstamp');
 const { markSelling, markSold, improveSellOffer, hasEnoughToTrade } = require('./helpers');
 
-async function sellMode(currencyPair, config) {
-  const { changePercentage, comebackPercentage, tradePercentage } = config;
+async function sellMode(config) {
+  const { changePercentage, comebackPercentage, tradePercentage, currencyPair } = config;
   const { currentAsk, hourlyOpen } = Price.find({ currencyPair }).value();
   const { assets, feePercentage = 0.0 } = Balance.find({ currencyPair }).value();
   const { assets: lastBoughtAssets, exchangeRate: lastBoughtBid } = Transaction.find({ currencyPair, type: 'buy' }).value();
@@ -34,7 +34,8 @@ async function sellMode(currencyPair, config) {
   const recoveryReached = hasDecreasedFor(currentAsk, selling, comebackPercentage);
   if (selling) {
     if (recoveryReached && targetProfitReached) {
-      const { soldValue, soldAmount } = await sell(valueToSell, assetsToSell, currencyPair);
+      const api = Api.getInstance(config);
+      const { soldValue, soldAmount } = await api.sell(valueToSell, assetsToSell);
       await markSold(currencyPair, soldValue, soldAmount);
     } else if (askHasRisen) {
       await markSelling(currencyPair, currentAsk, assetsToSell);
