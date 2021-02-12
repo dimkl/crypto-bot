@@ -26,3 +26,5 @@ npm start
 - support transactions and profit per transaction
 - test sell & buy api calls using nock
 - add buy & sell e2e flow with mock data
+- websocket api
+- improve sync mode by reusing endpoints with batch response data
