@@ -6,7 +6,7 @@ const {
     getExchangeRateKey,
     getTransactionType,
     getExchangeType,
-    errorHandler
+    handleErrorResponse
 } = require('./helpers');
 const { makePercentage, isLive } = require('../../helpers');
 
@@ -21,19 +21,29 @@ class Api {
     }
 
     async getLiveValues() {
-        const { open, bid, ask, vwap } = await this.api.ticker({ currencyPair: this.currencyPair });
-        return { open, currentBid: bid, currentAsk: ask, vwap };
+        try {
+            const { open, bid, ask, vwap } = await this.api.ticker({ currencyPair: this.currencyPair });
+            return { open, currentBid: bid, currentAsk: ask, vwap };
+        } catch (err) {
+            handleErrorResponse(err);
+        }
+        return {};
     }
 
     async getHourlyValues() {
-        const { open, bid, ask, vwap } = await this.api.tickerHour({ currencyPair: this.currencyPair });
-        return { hourlyBid: bid, hourlyAsk: ask, hourlyOpen: open, hourlyVwap: vwap };
+        try {
+            const { open, bid, ask, vwap } = await this.api.tickerHour({ currencyPair: this.currencyPair });
+            return { hourlyBid: bid, hourlyAsk: ask, hourlyOpen: open, hourlyVwap: vwap };
+        } catch (err) {
+            handleErrorResponse(err);
+        }
+        return {};
     }
 
     async getAccountBalance() {
         if (!isLive()) return {};
 
-        return errorHandler(async () => {
+        try {
             const response = await this.api.balance();
 
             const [assetKey, capitalKey] = getAvailableKeys(this.currencyPair);
@@ -44,43 +54,50 @@ class Api {
                 capital: response[capitalKey],
                 feePercentage: makePercentage(response[feeKey])
             };
-        });
+        } catch (err) {
+            handleErrorResponse(err);
+        }
+        return {};
     }
 
     async sell(limitValue, assets) {
         const defaultResponse = { soldAt: Date.now(), soldValue: limitValue, soldAmount: assets };
-        if (!isLive()) {
-            return defaultResponse;
-        }
+        if (!isLive()) return defaultResponse;
 
-        return errorHandler(async () => {
+        try {
             const body = { amount: assets, price: limitValue };
             const response = await this.api.sell({ currencyPair: this.currencyPair, ...body });
 
             const { id: orderId, datetime, price, amount } = response;
             return { orderId, soldAt: datetime, soldValue: price, soldAmount: amount };
-        }, defaultResponse);
+        } catch (err) {
+            handleErrorResponse(err);
+        }
+
+        return defaultResponse;
     }
 
     async buy(limitValue, assets) {
         const defaultResponse = { boughtAt: Date.now(), boughtValue: limitValue, boughtAmount: assets };
-        if (!isLive()) {
-            return defaultResponse;
-        }
+        if (!isLive()) return defaultResponse;
 
-        return errorHandler(async () => {
+        try {
             const body = { amount: assets, price: limitValue };
             const response = await this.api.buy({ currencyPair: this.currencyPair, ...body });
 
             const { id: orderId, datetime, price, amount } = response;
             return { orderId, boughtAt: datetime, boughtValue: price, boughtAmount: amount }
-        }, defaultResponse);
+        } catch (err) {
+            handleErrorResponse(err);
+        }
+
+        return defaultResponse;
     }
 
     async getUserTransactions() {
         if (!isLive()) return [];
 
-        return errorHandler(async () => {
+        try {
             const response = await this.api.userTransactions({ limit: 10 });
 
             const [assetsKey, capitalKey] = splitCurrencies(this.currencyPair);
@@ -98,7 +115,11 @@ class Api {
                     exchangeRate: t[getExchangeRateKey(this.currencyPair)],
                     exchangeType: getExchangeType(t[capitalKey])
                 }));
-        }, []);
+        } catch (err) {
+            handleErrorResponse(err);
+        }
+
+        return [];
     }
 
     async getUserLastBuyTransaction() {

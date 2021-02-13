@@ -23,21 +23,15 @@ function getExchangeType(capital) {
     return capital > 0 ? 'sell' : 'buy';
 }
 
-async function errorHandler(handler, defaultResponse = {}) {
-    try {
-        const response = await handler();
-        return response
-    } catch (err) {
-        const { statusCode, body } = err.response || {};
-        const { requestUrl } = err.request || {};
-        if (err.message.includes('Timeout')) {
-            console.log({ requestUrl, timings: JSON.stringify(err.timings) });
-        } else if (statusCode) {
-            console.log({ requestUrl, statusCode, body });
-        } else {
-            console.error(err);
-        }
-        return defaultResponse;
+async function handleErrorResponse(err) {
+    const { statusCode, body } = err.response || {};
+    const { requestUrl } = err.request || {};
+    if (err.message.includes('Timeout')) {
+        console.log({ requestUrl, timings: JSON.stringify(err.timings) });
+    } else if (statusCode) {
+        console.log({ requestUrl, statusCode, body });
+    } else {
+        console.error(err);
     }
 }
 
@@ -48,5 +42,5 @@ module.exports = {
     getTransactionType,
     getExchangeRateKey,
     getExchangeType,
-    errorHandler
+    handleErrorResponse
 };
