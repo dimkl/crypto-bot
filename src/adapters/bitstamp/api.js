@@ -10,14 +10,17 @@ const {
 } = require('./helpers');
 const { makePercentage, isLive } = require('../../helpers');
 
-const cache = {};
+const apiCache = {};
+
 class Api {
     constructor(options) {
+        const { currencyPair } = options;
+
         this.api = SDK(options);
-        this.currencyPair = options && options.currencyPair;
+        this.currencyPair = currencyPair;
     }
 
-    async getCurrentValues() {
+    async getLiveValues() {
         const { open, bid, ask, vwap } = await this.api.ticker({ currencyPair: this.currencyPair });
         return { open, currentBid: bid, currentAsk: ask, vwap };
     }
@@ -109,11 +112,11 @@ class Api {
         const { apikey, apiSecret } = options;
         const cacheKey = `${apikey}-${apiSecret}`;
 
-        if (!cache[cacheKey]) {
-            cache[cacheKey] = new Api(options);
+        if (!apiCache[cacheKey]) {
+            apiCache[cacheKey] = new Api(options);
         }
 
-        return cache[cacheKey];
+        return apiCache[cacheKey];
     }
 }
 module.exports = Api;

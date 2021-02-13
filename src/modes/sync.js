@@ -1,7 +1,7 @@
-const { Balance, Price, Transaction, State } = require('../models');
-const db = require('../storage');
+const models = require('../models');
 const Api = require('../adapters/bitstamp');
 const { appendFile } = require('fs');
+const { Balance, State, Transaction, Price } = models;
 
 const initialized = {};
 
@@ -9,25 +9,25 @@ function stateExists(currencyPair, mode) {
   return !!State.find({ currencyPair, mode }).value();
 }
 
-function stateCreate(currencyPair, mode) {
+function createState(currencyPair, mode) {
   State.push({ currencyPair, mode, createdAt: new Date() }).write();
 }
 
-function initializeCurrencyPairs(currencyPair) {
-  const collections = ['transactions', 'prices', 'balance', 'config', 'state'];
-  collections.forEach((collection) => {
-    const exists = db.get(collection).find({ currencyPair }).value();
+function setupModel(Model, currencyPair) {
+  const exists = Model.find({ currencyPair }).value();
+  if (!exists) {
+    Model.push({ currencyPair }).write();
+  }
+}
 
-    if (!exists) {
-      db.get(collection)
-        .push({ currencyPair })
-        .write();
-    }
-  });
+function initializeCurrencyPairs(currencyPair) {
+  Object.values(models).forEach(Model => setupModel(Model, currencyPair));
 
   // state model setup
   ['buy', 'sell'].forEach(mode => {
-    if (!stateExists(currencyPair, mode)) stateCreate(currencyPair, mode);
+    if (!stateExists(currencyPair, mode)) {
+      createState(currencyPair, mode);
+    }
   });
 
   initialized[currencyPair] = true;
@@ -43,7 +43,7 @@ async function sync(config) {
     { assets, capital, feePercentage },
     { assets: lastBoughtAssets, exchangeRate: lastBoughtBid } = {}
   ] = await Promise.all([
-    api.getCurrentValues(),
+    api.getLiveValues(),
     api.getHourlyValues(),
     api.getAccountBalance(),
     api.getUserLastBuyTransaction()
