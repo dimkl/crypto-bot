@@ -11,8 +11,8 @@ const { sellMode, buyMode, syncMode } = require('./modes');
 
 	setInterval(() => {
 		syncMode({ currencyPair, ...authConfig }).then(() => {
-			sellMode({ currencyPair, ...sellConfig, ...authConfig });
-			buyMode({ currencyPair, ...buyConfig, ...authConfig });
-		});
+			sellMode({ currencyPair, ...sellConfig, ...authConfig }).catch(console.error);
+			buyMode({ currencyPair, ...buyConfig, ...authConfig }).catch(console.error);
+		}).catch(console.error);
 	}, interval);
 })
