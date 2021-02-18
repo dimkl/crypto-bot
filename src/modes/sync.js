@@ -33,10 +33,9 @@ function initializeCurrencyPairs(currencyPair) {
   initialized[currencyPair] = true;
 }
 
-async function sync(config) {
-  const { currencyPair, ...authConfig } = config;
+async function sync(config, api) {
+  const { currencyPair } = config;
 
-  const api = Api.getInstance({ currencyPair, ...authConfig });
   const [
     { currentBid, currentAsk, open, vwap },
     { hourlyBid, hourlyAsk, hourlyOpen, hourlyVwap },

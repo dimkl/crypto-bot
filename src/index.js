@@ -1,5 +1,6 @@
 const { Config } = require('./models');
 const { sellMode, buyMode, syncMode } = require('./modes');
+const Api = require('./adapters/bitstamp');
 
 // ['xrpeur', 'xlmeur', 'btceur', 'etheur', 'omgeur', 'ltceur'].map((currencyPair) => {
 ['xrpeur', 'xlmeur', 'omgeur', 'btceur'].map((currencyPair) => {
@@ -10,9 +11,11 @@ const { sellMode, buyMode, syncMode } = require('./modes');
 	}
 
 	setInterval(() => {
-		syncMode({ currencyPair, ...authConfig }).then(() => {
-			sellMode({ currencyPair, ...sellConfig, ...authConfig }).catch(console.error);
-			buyMode({ currencyPair, ...buyConfig, ...authConfig }).catch(console.error);
+		const api = Api.getInstance({ currencyPair, ...authConfig });
+
+		syncMode({ currencyPair }, api).then(() => {
+			sellMode({ currencyPair, ...sellConfig }, api).catch(console.error);
+			buyMode({ currencyPair, ...buyConfig }, api).catch(console.error);
 		}).catch(console.error);
 	}, interval);
 })

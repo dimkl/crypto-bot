@@ -1,9 +1,8 @@
 const { Balance, Price, State } = require('../models');
 const { hasDecreasedFor, hasIncreasedFor } = require('../helpers');
-const Api = require('../adapters/bitstamp');
 const { markBuying, markBought, improveBuyOffer, hasEnoughToTrade } = require('./helpers');
 
-async function buyMode(config) {
+async function buyMode(config, api) {
   const { changePercentage, comebackPercentage, tradePercentage, currencyPair } = config;
   const { currentBid, hourlyOpen } = Price.find({ currencyPair }).value();
   const { capital, feePercentage = 0.0 } = Balance.find({ currencyPair }).value();
@@ -31,7 +30,6 @@ async function buyMode(config) {
   const recoveryReached = hasIncreasedFor(currentBid, buying, comebackPercentage);
   if (buying) {
     if (recoveryReached && targetProfitReached) {
-      const api = Api.getInstance(config);
       const { boughtValue, boughtAmount } = await api.buy(valueToBuy, assetsToBuy, currencyPair);
       await markBought(currencyPair, boughtValue, boughtAmount);
     } else if (bidHasDropped) {
