@@ -1,14 +1,13 @@
 const SDK = require('bitstamp-sdk');
 const {
     getAvailableKeys,
-    splitCurrencies,
     getFeeKey,
     getExchangeRateKey,
     getTransactionType,
     getExchangeType,
     handleErrorResponse
 } = require('./helpers');
-const { makePercentage, isLive } = require('../../helpers');
+const { makePercentage, isLive, splitCurrencies } = require('../../helpers');
 
 const apiCache = {};
 

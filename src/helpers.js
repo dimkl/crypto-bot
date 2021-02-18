@@ -36,6 +36,11 @@ function makeModeConfig(trade, change, comeback) {
     comebackPercentage: makePercentage(comeback)
   };
 }
+
+function splitCurrencies(currencyPair) {
+  return [currencyPair.slice(0, 3), currencyPair.slice(3)];
+}
+
 module.exports = {
   makePercentage,
   intervalSeconds,
@@ -44,5 +49,6 @@ module.exports = {
   getChangePercentage,
   hasIncreasedFor,
   hasDecreasedFor,
-  makeModeConfig
+  makeModeConfig,
+  splitCurrencies
 };

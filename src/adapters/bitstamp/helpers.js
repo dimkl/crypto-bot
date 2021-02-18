@@ -1,7 +1,3 @@
-function splitCurrencies(currencyPair) {
-    return [currencyPair.slice(0, 3), currencyPair.slice(3)];
-}
-
 function getAvailableKeys(currencyPair) {
     return splitCurrencies(currencyPair).map(s => `${s}_available`);
 }
@@ -36,7 +32,6 @@ async function handleErrorResponse(err) {
 }
 
 module.exports = {
-    splitCurrencies,
     getFeeKey,
     getAvailableKeys,
     getTransactionType,
