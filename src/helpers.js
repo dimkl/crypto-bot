@@ -41,6 +41,18 @@ function splitCurrencies(currencyPair) {
   return [currencyPair.slice(0, 3), currencyPair.slice(3)];
 }
 
+async function handleErrorResponse(err) {
+  const { statusCode, body } = err.response || {};
+  const { requestUrl } = err.request || {};
+  if (err.message.includes('Timeout')) {
+    console.log({ requestUrl, timings: JSON.stringify(err.timings) });
+  } else if (statusCode) {
+    console.log({ requestUrl, statusCode, body });
+  } else {
+    console.error(err);
+  }
+}
+
 module.exports = {
   makePercentage,
   intervalSeconds,
@@ -50,5 +62,6 @@ module.exports = {
   hasIncreasedFor,
   hasDecreasedFor,
   makeModeConfig,
-  splitCurrencies
+  splitCurrencies,
+  handleErrorResponse
 };

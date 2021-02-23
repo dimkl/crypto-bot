@@ -1,5 +1,5 @@
 const { Balance, Price, State, AuditLog } = require("../../src/models");
-const buyMode = require("../../src/modes/buy");
+const BuyService = require("../../src/services/buy");
 
 const currencyPair = "xlmeur";
 
@@ -27,14 +27,19 @@ describe("buy mode", () => {
     const config = {
       changePercentage: "0.0500",
       comebackPercentage: "0.0100",
-      tradePercentage: "1.0000",
-      apiKey: 'deadbeefKey',
-      apiSecret: 'deadbeefSecret',
+      tradePercentage: "1.0000"
     };
+
+    const api = {
+      buy: jest.fn((limitValue, assets) => {
+        return { boughtAt: Date.now(), boughtValue: limitValue, boughtAmount: assets };
+      })
+    };
+    const service = new BuyService({ currencyPair, ...config }, api);
 
     for (const dt of data) {
       Price.find({ currencyPair }).assign(dt).write();
-      await buyMode({ currencyPair, ...config });
+      await service.process();
 
       // end buying
       if (getState().final) Balance.find({ currencyPair }).assign({ capital: 0 }).write();

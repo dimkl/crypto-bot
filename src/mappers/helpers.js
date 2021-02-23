@@ -1,3 +1,5 @@
+const { splitCurrencies } = require('../helpers');
+
 function getAvailableKeys(currencyPair) {
     return splitCurrencies(currencyPair).map(s => `${s}_available`);
 }

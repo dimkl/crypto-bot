@@ -1,5 +1,3 @@
 module.exports = {
-  syncMode: require('./sync'),
-  buyMode: require('./buy'),
-  sellMode: require('./sell')
+  syncMode: require('./sync')
 };

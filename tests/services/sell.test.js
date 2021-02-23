@@ -1,5 +1,5 @@
 const { Balance, Price, Transaction, State, AuditLog } = require('../../src/models');
-const sellMode = require('../../src/modes/sell');
+const SellService = require('../../src/services/sell');
 
 const currencyPair = 'xlmeur';
 
@@ -28,9 +28,7 @@ describe("sell mode", () => {
     const config = {
       changePercentage: '0.1000',
       comebackPercentage: '0.0200',
-      tradePercentage: '1.0000',
-      apiKey: 'deadbeefKey',
-      apiSecret: 'deadbeefSecret',
+      tradePercentage: '1.0000'
     };
 
     const data = [
@@ -44,9 +42,17 @@ describe("sell mode", () => {
       { currentAsk: 95, hourlyOpen: 100 },
     ];
 
+    const api = {
+      sell: jest.fn((limitValue, assets) => {
+        return { soldAt: Date.now(), soldValue: limitValue, soldAmount: assets };
+      })
+    };
+    const service = new SellService({ currencyPair, ...config }, api);
+
+
     for (const dt of data) {
       Price.find({ currencyPair }).assign(dt).write();
-      await sellMode({ currencyPair, ...config });
+      await service.process({ currencyPair, ...config });
 
       // end selling
       if (getState().final) Balance.find({ currencyPair }).assign({ assets: 0 }).write();

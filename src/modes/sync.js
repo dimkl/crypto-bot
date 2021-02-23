@@ -1,5 +1,4 @@
 const models = require('../models');
-const Api = require('../adapters/bitstamp');
 const { appendFile } = require('fs');
 const { Balance, State, Transaction, Price } = models;
 
