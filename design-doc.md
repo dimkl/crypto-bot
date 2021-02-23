@@ -10,6 +10,7 @@ that each day there will be peaks based on the open price and the
 price will be approximately the same by the end of the day.
 
 In the "buy" operation:
+
 - capital should exist
 - value should be more than a configured threshold
 - recovery percentage will be used after configured threshold is reached
@@ -38,6 +39,19 @@ else if there are no buy transactions
   => wait for sell conditions based on open value
 else if there are buy transactions
   => wait for sell conditions based on the bought value
+
+## Overview
+
+### Architecture
+
+| Sync |  ->  |DB|  <- |Trade|
+
+- Each time a `sync` operation is trigger a `trade` operation should be triggered too.
+- Each currency pair should be executed separately (cache the batch api calls for some milliseconds to reduce api usage)
+- Each `sync` should have a retry if possible
+- A `trade` operation is executed in the context of a currency pair
+- Each `trade` operation can be either `sell` or `buy` and not both
+- A `sync` operation can be executed in intervals or by waiting server to push data
 
 ## Solution
 
