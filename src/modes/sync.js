@@ -1,72 +1,83 @@
-const models = require('../models');
 const { appendFile } = require('fs');
-const { Balance, State, Transaction, Price } = models;
+const models = require('../models');
+const { SellService, BuyService, SetupDBService } = require('../services');
+const { Balance, Transaction, Price } = models;
 
-const initialized = {};
+const setupDBService = new SetupDBService();
 
-function stateExists(currencyPair, mode) {
-  return !!State.find({ currencyPair, mode }).value();
+async function syncPrices(currencyPair, api) {
+  const [
+    liveValues,
+    hourlyValues,
+  ] = await Promise.all([
+    api.getLiveValues(),
+    api.getHourlyValues()
+  ]);
+  Price
+    .find({ currencyPair })
+    .assign(liveValues)
+    .assign(hourlyValues)
+    .write();
+
+  return { liveValues, hourlyValues };
 }
 
-function createState(currencyPair, mode) {
-  State.push({ currencyPair, mode, createdAt: new Date() }).write();
+async function syncBalance(currencyPair, api) {
+  const accountBalance = await api.getAccountBalance();
+  Balance
+    .find({ currencyPair })
+    .assign(accountBalance)
+    .write();
+
+  return accountBalance;
 }
 
-function setupModel(Model, currencyPair) {
-  const exists = Model.find({ currencyPair }).value();
-  if (!exists) {
-    Model.push({ currencyPair }).write();
-  }
-}
+async function syncBuyTransaction(currencyPair, api) {
+  const buyTransaction = await api.getUserLastBuyTransaction();
 
-function initializeCurrencyPairs(currencyPair) {
-  Object.values(models).forEach(Model => setupModel(Model, currencyPair));
+  Transaction
+    .find({ currencyPair })
+    .assign({ type: 'buy', ...buyTransaction })
+    .write();
 
-  // state model setup
-  ['buy', 'sell'].forEach(mode => {
-    if (!stateExists(currencyPair, mode)) {
-      createState(currencyPair, mode);
-    }
-  });
-
-  initialized[currencyPair] = true;
+  return buyTransaction
 }
 
 async function sync(config, api) {
   const { currencyPair } = config;
 
-  const [
-    { currentBid, currentAsk, open, vwap },
-    { hourlyBid, hourlyAsk, hourlyOpen, hourlyVwap },
-    { assets, capital, feePercentage },
-    { assets: lastBoughtAssets, exchangeRate: lastBoughtBid } = {}
-  ] = await Promise.all([
-    api.getLiveValues(),
-    api.getHourlyValues(),
-    api.getAccountBalance(),
-    api.getUserLastBuyTransaction()
+  await setupDBService.process(currencyPair);
+
+  const [{ liveValues, hourlyValues }] = await Promise.all([
+    syncPrices(currencyPair, api),
+    syncBalance(currencyPair, api),
+    syncBuyTransaction(currencyPair, api)
   ]);
 
-  if (!initialized[currencyPair]) initializeCurrencyPairs(currencyPair);
-
-  Balance
-    .find({ currencyPair })
-    .assign({ capital, assets, feePercentage })
-    .write();
-  Price
-    .find({ currencyPair })
-    .assign({ currentBid, currentAsk, open, vwap })
-    .assign({ hourlyBid, hourlyAsk, hourlyOpen, hourlyVwap })
-    .write();
-  Transaction
-    .find({ currencyPair })
-    .assign({ type: 'buy', assets: lastBoughtAssets, exchangeRate: lastBoughtBid })
-    .write();
-
   await new Promise((resolve, reject) => {
-    const data = JSON.stringify({ currentBid, currentAsk, open, hourlyBid, hourlyAsk, hourlyOpen, createdAt: Date.now() });
+    const data = JSON.stringify({ ...liveValues, ...hourlyValues, createdAt: Date.now() });
     appendFile(`${currencyPair}.jsonl`, data + ',\n', (err) => err ? reject(err) : resolve());
   });
 }
 
-module.exports = sync;
+module.exports = (config, api) => {
+  const { interval, currencyPair } = config;
+
+  if (!interval) {
+    console.log(`add configuration for ${currencyPair} in db.json`)
+    return;
+  }
+
+  const sellService = new SellService({ currencyPair, ...config.sellMode }, api);
+  const buyService = new BuyService({ currencyPair, ...config.buyMode }, api);
+
+  setInterval(() => {
+    console.log(currencyPair, ' syncing: ', new Date())
+    sync(config, api).then(() => {
+      return Promise.all([
+        sellService.process(),
+        buyService.process()
+      ]).catch(console.error);
+    }).catch(console.error);
+  }, interval);
+};

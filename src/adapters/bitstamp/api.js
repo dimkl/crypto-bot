@@ -13,6 +13,10 @@ class Api {
         this.currencyPair = currencyPair;
     }
 
+    async initialized() {
+        return true;
+    }
+
     async getLiveValues() {
         try {
             const response = await this.api.ticker({ currencyPair: this.currencyPair });

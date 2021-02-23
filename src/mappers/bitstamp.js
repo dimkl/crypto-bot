@@ -7,7 +7,6 @@ const {
 } = require('./helpers');
 const { makePercentage, splitCurrencies } = require('../helpers');
 
-
 class BitstampMapper {
   constructor(options) {
     const { currencyPair } = options;

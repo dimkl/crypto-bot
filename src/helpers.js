@@ -53,6 +53,10 @@ async function handleErrorResponse(err) {
   }
 }
 
+function convertCurrencyToISO4217(currencyPair) {
+  return splitCurrencies(currencyPair).map(s => s.toUpperCase()).join('/');
+}
+
 module.exports = {
   makePercentage,
   intervalSeconds,
@@ -63,5 +67,6 @@ module.exports = {
   hasDecreasedFor,
   makeModeConfig,
   splitCurrencies,
-  handleErrorResponse
+  handleErrorResponse,
+  convertCurrencyToISO4217
 };
