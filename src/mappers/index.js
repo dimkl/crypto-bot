@@ -1,3 +1,4 @@
 module.exports = {
-  BitstampMapper: require('./bitstamp')
+  BitstampMapper: require('./bitstamp'),
+  KrakenMapper: require('./kraken')
 };

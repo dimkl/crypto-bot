@@ -1,3 +1,4 @@
 module.exports = {
-  syncMode: require('./sync')
+  syncMode: require('./sync'),
+  syncSocketMode: require('./sync.socket')
 };
