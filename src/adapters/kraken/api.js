@@ -1,5 +1,5 @@
 const KrakenClient = require('kraken-api');
-const { handleErrorResponse, splitCurrencies } = require('../../helpers');
+const { handleErrorResponse, splitCurrencies, convertCurrencyToISO4217 } = require('../../helpers');
 const KrakenMapper = require('../../mappers/kraken');
 
 const apiCache = {};
@@ -14,7 +14,7 @@ class Api {
         this.mapper = new KrakenMapper(options);
 
         this.client = new KrakenClient(apiKey, apiSecret);
-        this.currencyPair = currencyPair;
+        this.currencyPair = convertCurrencyToISO4217(currencyPair);
     }
 
     async getLiveValues() {

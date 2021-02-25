@@ -3,13 +3,13 @@ const {
   getTransactionType,
   getExchangeType,
 } = require('./helpers');
-const { makePercentage, splitCurrencies } = require('../helpers');
+const { makePercentage, splitCurrencies, convertCurrencyToISO4217 } = require('../helpers');
 
 
 class KrakenMapper {
   constructor(options) {
     const { currencyPair } = options;
-    this.currencyPair = currencyPair;
+    this.currencyPair = convertCurrencyToISO4217(currencyPair);
   }
 
   liveValues(data) {
@@ -29,8 +29,23 @@ class KrakenMapper {
   }
 
   hourlyValues(data) {
-    const { open, bid, ask, vwap } = data;
-    return { hourlyBid: bid, hourlyAsk: ask, hourlyOpen: open, hourlyVwap: vwap };
+    /*
+    channelID	integer	ChannelID of pair-ohlc subscription
+    Array	
+      time	decimal	Begin time of interval, in seconds since epoch
+      etime	decimal	End time of interval, in seconds since epoch
+      open	decimal	Open price of interval
+      high	decimal	High price within interval
+      low	decimal	Low price within interval
+      close	decimal	Close price of interval
+      vwap	decimal	Volume weighted average price within interval
+      volume	integer	Accumulated volume within interval
+      count	integer	Number of trades within interval
+    channelName	string	Channel Name of subscription
+    pair	string	Asset pair
+    */
+    const [_time, _etime, open, _high, _low, _close, vwap] = data;
+    return { hourlyBid: '', hourlyAsk: '', hourlyOpen: open, hourlyVwap: vwap };
   }
 
   accountBalance(data) {
@@ -68,10 +83,8 @@ class KrakenMapper {
 
   userTransactions(data) {
     // TODO: implement
-    const [assetsKey, capitalKey] = splitCurrencies(this.currencyPair);
-
     return data
-      .filter(t => t[getExchangeRateKey(this.currencyPair)])
+      // .filter(t => t[getExchangeRateKey(this.currencyPair)])
       .map(t => ({
         transactionId: t.id,
         orderId: t.order_id,

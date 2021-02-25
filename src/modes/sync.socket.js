@@ -4,11 +4,10 @@ const { Balance, Transaction, Price } = models;
 
 const setupDBService = new SetupDBService();
 
-async function syncPrices(currencyPair, liveValues) {
+async function syncPrices(currencyPair, liveValues, hourlyValues) {
   Price
     .find({ currencyPair })
-    .assign(liveValues)
-    // .assign(hourlyValues)
+    .assign({ ...liveValues, ...hourlyValues })
     .write();
 }
 
@@ -35,6 +34,10 @@ async function sync(config, api) {
   await setupDBService.process(currencyPair);
 
   api.getLiveValues(syncPrices.bind(null, currencyPair));
+  api.getHourlyValues(syncPrices.bind(null, currencyPair, null));
+  // api.getAccountBalance(syncBalance.bind(null, currencyPair));
+  // api.getUserLastBuyTransaction(syncBuyTransaction(null, currencyPair));
+
   api.getLiveValues(async (_) => {
     console.log(currencyPair, 'syncing socket:', new Date());
 
@@ -47,10 +50,6 @@ async function sync(config, api) {
       console.error(err);
     }
   });
-
-  // api.getHourlyValues(data => syncPrices.bind(null, currencyPair));
-  // api.getAccountBalance(syncBalance.bind(null, currencyPair));
-  // api.getUserLastBuyTransaction(syncBuyTransaction(null, currencyPair));
 
   await api.initialized();
   await api.finished();

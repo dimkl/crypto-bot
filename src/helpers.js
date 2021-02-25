@@ -38,6 +38,10 @@ function makeModeConfig(trade, change, comeback) {
 }
 
 function splitCurrencies(currencyPair) {
+  if (currencyPair.includes('/')) {
+    return currencyPair.split('/');
+  }
+
   return [currencyPair.slice(0, 3), currencyPair.slice(3)];
 }
 

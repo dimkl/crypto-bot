@@ -1,6 +1,7 @@
 // Docs: https://docs.kraken.com/websockets/
 
 const WebSocket = require('faye-websocket');
+const KrakenClient = require('kraken-api');
 const KrakenMapper = require('../../mappers/kraken');
 const { convertCurrencyToISO4217 } = require('../../helpers');
 
@@ -10,13 +11,17 @@ const API_KEY = process.env.KRAKEN_API_KEY;
 const API_SECRET = process.env.KRAKEN_API_SECRET;
 
 const IGNORED_EVENTS = Object.freeze(['heartbeat', 'systemStatus', 'subscriptionStatus']);
-const EVENT_TO_MAPPER_METHODS = Object.freeze({ ticker: 'liveValues' });
+const EVENT_TO_MAPPER_METHODS = Object.freeze({
+  ticker: 'liveValues',
+  'ohlc-60': 'hourlyValues'
+});
 
 class Api {
   constructor(options) {
     const { currencyPair } = options;
     const { apiKey = API_KEY, apiSecret = API_SECRET } = options;
 
+    this.restClient = new KrakenClient(apiKey, apiSecret);
     this.mapper = new KrakenMapper(options);
 
     this.client = new WebSocket.Client("wss://ws.kraken.com");
@@ -26,14 +31,35 @@ class Api {
     this.channels = {};
   }
 
-  async getLiveValues(callback) {
-    const tickerMessage = {
+  _publicMessage(channel, params = {}) {
+    return {
       "event": "subscribe",
       "pair": [this.currencyPair],
       "subscription": {
-        "name": "ticker"
+        "name": channel,
+        ...params
       }
-    };
+    }
+  }
+
+  _privateMessage(channel, { token, ...params } = {}) {
+    return {
+      "event": "subscribe",
+      "subscription": {
+        "name": channel, //eg "ownTrades", "openOrders"
+        "token": token,
+        ...params
+      }
+    }
+  }
+
+  async _getToken() {
+    const { result } = await this.restClient.api('GetWebSocketsToken');
+    return result.token;
+  }
+
+  async getLiveValues(callback) {
+    const tickerMessage = this._publicMessage('ticker');
     this.messages['ticker'] = this.messages['ticker'] || (JSON.stringify(tickerMessage))
 
     this.handlers['ticker'] = this.handlers['ticker'] || [];
@@ -43,11 +69,11 @@ class Api {
   }
 
   async getHourlyValues(callback) {
-    // TODO: missing hourly values, should find a way to by pass it
-    this.messages['hourly'] = null;
+    const ohlcMessage = this._publicMessage('ohlc', { interval: 60 });
+    this.messages['ohlc-60'] = this.messages['ohlc-60'] || (JSON.stringify(ohlcMessage))
 
-    this.handlers['hourly'] = this.handlers['hourly'] || [];
-    this.handlers['hourly'].push(callback)
+    this.handlers['ohlc-60'] = this.handlers['ohlc-60'] || [];
+    this.handlers['ohlc-60'].push(callback)
   }
 
   async getAccountBalance(callback) {
