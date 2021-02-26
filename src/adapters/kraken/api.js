@@ -17,6 +17,15 @@ class Api {
         this.currencyPair = convertCurrencyToISO4217(currencyPair);
     }
 
+    async getToken() {
+        try {
+            const { result } = await this.client.api('GetWebSocketsToken');
+            return result.token;
+        } catch (err) {
+            handleErrorResponse(err);
+        }
+    }
+
     async getLiveValues() {
         try {
             const response = await this.client.api('Ticker', { pair: this.currencyPair });

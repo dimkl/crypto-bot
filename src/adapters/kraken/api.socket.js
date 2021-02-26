@@ -1,14 +1,11 @@
 // Docs: https://docs.kraken.com/websockets/
 
 const WebSocket = require('faye-websocket');
-const KrakenClient = require('kraken-api');
+const RestApi = require('./api');
 const KrakenMapper = require('../../mappers/kraken');
 const { convertCurrencyToISO4217 } = require('../../helpers');
 
 const apiCache = {};
-
-const API_KEY = process.env.KRAKEN_API_KEY;
-const API_SECRET = process.env.KRAKEN_API_SECRET;
 
 const IGNORED_EVENTS = Object.freeze(['heartbeat', 'systemStatus', 'subscriptionStatus']);
 const EVENT_TO_MAPPER_METHODS = Object.freeze({
@@ -20,9 +17,8 @@ const EVENT_TO_MAPPER_METHODS = Object.freeze({
 class Api {
   constructor(options) {
     const { currencyPair } = options;
-    const { apiKey = API_KEY, apiSecret = API_SECRET } = options;
 
-    this.restClient = new KrakenClient(apiKey, apiSecret);
+    this.restClient = RestApi.getInstance(options);
     this.mapper = new KrakenMapper(options);
 
     this.currencyPair = convertCurrencyToISO4217(currencyPair);
@@ -120,11 +116,6 @@ class Api {
     return this.isInitialized[client.url];
   }
 
-  async _getToken() {
-    const { result } = await this.restClient.api('GetWebSocketsToken');
-    return result.token;
-  }
-
   async getLiveValues(callback) {
     const tickerMessage = this._publicMessage('ticker');
     this.messages['ticker'] = JSON.stringify(tickerMessage);
@@ -144,11 +135,13 @@ class Api {
   }
 
   async getAccountBalance(callback) {
-    // TODO: check if i should even implement it
+    const balance = await this.restClient.getAccountBalance();
+    return callback(balance);
   }
 
   async getUserTransactions(callback) {
-    const ownTradesMessage = this._privateMessage('ownTrades', await this._getToken());
+    const token = await this.restClient.getToken();
+    const ownTradesMessage = this._privateMessage('ownTrades', token);
     this.privateMessages['ownTrades'] = JSON.stringify(ownTradesMessage);
 
     this.handlers['ownTrades'] = this.handlers['ownTrades'] || [];

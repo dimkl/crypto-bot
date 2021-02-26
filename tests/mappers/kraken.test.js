@@ -56,4 +56,15 @@ describe('KrakenMapper(options)', () => {
       });
     });
   });
+
+  describe('accountBalance(data)', () => {
+    test('returns mapped data', () => {
+      const data = { XXRP: '20.00000000', XXLM: '960.31161000' };
+      expect(this.mapper.accountBalance(data)).toMatchObject({
+        assets: "960.31161000",
+        capital: undefined,
+        feePercentage: "0.0000"
+      });
+    });
+  });
 });
