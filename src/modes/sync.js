@@ -44,11 +44,7 @@ async function syncBuyTransaction(currencyPair, api) {
 async function sync(config, api) {
   const { currencyPair } = config;
 
-  const [{ liveValues, hourlyValues }] = await Promise.all([
-    syncPrices(currencyPair, api),
-    syncBalance(currencyPair, api).catch(console.error),
-    syncBuyTransaction(currencyPair, api).catch(console.error)
-  ]);
+  const { liveValues, hourlyValues } = await syncPrices(currencyPair, api);
 
   await new Promise((resolve, reject) => {
     const data = JSON.stringify({ ...liveValues, ...hourlyValues, createdAt: Date.now() });
@@ -68,7 +64,8 @@ module.exports = (config, api) => {
   const buyService = new BuyService({ currencyPair, ...config.buyMode }, api);
 
   setInterval(() => {
-    console.log(currencyPair, ' syncing: ', new Date())
+    console.log(currencyPair, ' syncing prices: ', new Date());
+
     sync(config, api).then(() => {
       return Promise.all([
         sellService.process(),
@@ -76,4 +73,14 @@ module.exports = (config, api) => {
       ]);
     }).catch(console.error);
   }, interval);
+
+  setInterval(() => {
+    console.log(currencyPair, ' syncing balance: ', new Date());
+    syncBalance(currencyPair, api).catch(console.error);
+  }, 4 * interval);
+
+  setInterval(() => {
+    console.log(currencyPair, ' syncing user transactions: ', new Date());
+    syncBuyTransaction(currencyPair, api).catch(console.error);
+  }, 4 * interval);
 };
