@@ -8,16 +8,21 @@ class SellService {
     this.api = api;
   }
 
+  get lastBoughtBid() {
+    const { currencyPair, manualLastBoughtBid } = this.config;
+    const { exchangeRate: lastBoughtBid } = Transaction.find({ currencyPair, type: 'buy' }).value();
+    return lastBoughtBid || manualLastBoughtBid;
+  }
+
   canBeTriggered() {
     const { tradePercentage, currencyPair } = this.config;
     const { currentAsk, hourlyOpen } = Price.find({ currencyPair }).value();
     const { assets } = Balance.find({ currencyPair }).value();
-    const { exchangeRate: lastBoughtBid } = Transaction.find({ currencyPair, type: 'buy' }).value();
 
     const isValueRising = currentAsk >= hourlyOpen;
     const hasAssets = assets > 0;
 
-    if (!isValueRising || !lastBoughtBid || !hasAssets) return false;
+    if (!isValueRising || !this.lastBoughtBid || !hasAssets) return false;
 
     const tradeableAssets = tradePercentage * assets;
     const {
@@ -36,7 +41,6 @@ class SellService {
     const { changePercentage, comebackPercentage, tradePercentage, currencyPair } = this.config;
     const { currentAsk } = Price.find({ currencyPair }).value();
     const { assets, feePercentage = 0.0 } = Balance.find({ currencyPair }).value();
-    const { exchangeRate: lastBoughtBid } = Transaction.find({ currencyPair, type: 'buy' }).value();
     const { current: selling } = State.find({ currencyPair, mode: 'sell' }).value();
 
     const targetWithFee = (parseFloat(changePercentage) + parseFloat(feePercentage)).toFixed(4);
@@ -52,7 +56,7 @@ class SellService {
 
     // TODO: consider using the hourlyAsk
 
-    const targetProfitReached = hasIncreasedFor(currentAsk, lastBoughtBid, percent);
+    const targetProfitReached = hasIncreasedFor(currentAsk, this.lastBoughtBid, percent);
     const recoveryReached = hasDecreasedFor(currentAsk, selling, comebackPercentage);
     if (selling) {
       const askHasRisen = currentAsk > selling;
