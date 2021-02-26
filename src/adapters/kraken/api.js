@@ -137,8 +137,8 @@ class Api {
     }
 
     static getInstance(options) {
-        const { apikey, apiSecret } = options;
-        const cacheKey = [apikey, apiSecret].filter(Boolean).join('-');
+        const { apikey, apiSecret, currencyPair } = options;
+        const cacheKey = [apikey, apiSecret, currencyPair].filter(Boolean).join('-');
 
         if (!cacheKey || !apiCache[cacheKey]) {
             apiCache[cacheKey] = new Api(options);
