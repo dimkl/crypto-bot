@@ -1,5 +1,5 @@
 const KrakenClient = require('kraken-api');
-const { handleErrorResponse, splitCurrencies, convertCurrencyToISO4217 } = require('../../helpers');
+const { handleErrorResponse, convertCurrencyToISO4217 } = require('../../helpers');
 const KrakenMapper = require('../../mappers/kraken');
 
 const apiCache = {};

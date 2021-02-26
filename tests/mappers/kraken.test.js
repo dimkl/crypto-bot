@@ -68,7 +68,7 @@ describe('KrakenMapper(options)', () => {
     });
   });
 
-  describe('sell(limitValue, assets)', () => {
+  describe('sell(data)', () => {
     test('returns mapped data', () => {
       const data = {
         descr: { order: 'sell 20.00000000 XRPEUR @ limit 0.60000' },
@@ -86,7 +86,7 @@ describe('KrakenMapper(options)', () => {
     })
   });
 
-  describe('buy(limitValue, assets)', () => {
+  describe('buy(data)', () => {
     test('returns mapped data', () => {
       const data = {
         descr: { order: 'buy 20.00000000 XRPEUR @ limit 0.60000' },

@@ -1,9 +1,4 @@
 const get = require('lodash.get');
-const {
-  getExchangeRateKey,
-  getTransactionType,
-  getExchangeType,
-} = require('./helpers');
 const { makePercentage, splitCurrencies, convertCurrencyToISO4217 } = require('../helpers');
 
 
@@ -95,15 +90,15 @@ class KrakenMapper {
     return data
       // .filter(t => t[getExchangeRateKey(this.currencyPair)])
       .map(t => ({
-        transactionId: t.id,
-        orderId: t.order_id,
-        transactionType: getTransactionType(t.type),
-        capital: Math.abs(t[capitalKey]),
-        assets: Math.abs(t[assetsKey]),
-        feeAmount: t.fee,
-        datetime: t.datetime,
-        exchangeRate: t[getExchangeRateKey(this.currencyPair)],
-        exchangeType: getExchangeType(t[capitalKey])
+        transactionId: '',
+        orderId: '',
+        transactionType: '',
+        capital: '',
+        assets: '',
+        feeAmount: '',
+        datetime: '',
+        exchangeRate: '',
+        exchangeType: ''
       }));
   }
 }

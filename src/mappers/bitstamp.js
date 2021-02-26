@@ -1,16 +1,30 @@
-const {
-  getAvailableKeys,
-  getFeeKey,
-  getExchangeRateKey,
-  getTransactionType,
-  getExchangeType,
-} = require('./helpers');
 const { makePercentage, splitCurrencies } = require('../helpers');
 
 class BitstampMapper {
   constructor(options) {
     const { currencyPair } = options;
     this.currencyPair = currencyPair;
+  }
+
+  get availableKeys() {
+    return splitCurrencies(this.currencyPair).map(s => `${s}_available`);
+  }
+
+  get feeKey() {
+    return `${this.currencyPair}_fee`;
+  }
+
+  get exchangeRateKey() {
+    return splitCurrencies(this.currencyPair).join('_');
+  }
+
+  _getTransactionType(type) {
+    const mapping = { 0: 'deposit', 1: 'withdrawl', 2: 'market_trade', 14: 'sub_account_transfer' };
+    return mapping[type];
+  }
+
+  _getExchangeType(capital) {
+    return capital > 0 ? 'sell' : 'buy';
   }
 
   liveValues(data) {
@@ -24,8 +38,8 @@ class BitstampMapper {
   }
 
   accountBalance(data) {
-    const [assetKey, capitalKey] = getAvailableKeys(this.currencyPair);
-    const feeKey = getFeeKey(this.currencyPair);
+    const [assetKey, capitalKey] = this.availableKeys;
+    const feeKey = this.feeKey;
 
     return {
       assets: data[assetKey],
@@ -48,17 +62,17 @@ class BitstampMapper {
     const [assetsKey, capitalKey] = splitCurrencies(this.currencyPair);
 
     return data
-      .filter(t => t[getExchangeRateKey(this.currencyPair)])
+      .filter(t => t[this.exchangeRateKey])
       .map(t => ({
         transactionId: t.id,
         orderId: t.order_id,
-        transactionType: getTransactionType(t.type),
+        transactionType: this._getTransactionType(t.type),
         capital: Math.abs(t[capitalKey]),
         assets: Math.abs(t[assetsKey]),
         feeAmount: t.fee,
         datetime: t.datetime,
-        exchangeRate: t[getExchangeRateKey(this.currencyPair)],
-        exchangeType: getExchangeType(t[capitalKey])
+        exchangeRate: t[this.exchangeRateKey],
+        exchangeType: this._getExchangeType(t[capitalKey])
       }));
   }
 }
