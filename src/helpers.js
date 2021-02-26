@@ -62,15 +62,15 @@ function convertCurrencyToISO4217(currencyPair) {
 }
 
 module.exports = {
-  makePercentage,
+  convertCurrencyToISO4217,
+  getChangePercentage,
+  handleErrorResponse,
+  hasDecreasedFor,
+  hasIncreasedFor,
   intervalSeconds,
   isLive,
-  sliceObject,
-  getChangePercentage,
-  hasIncreasedFor,
-  hasDecreasedFor,
+  makePercentage,
   makeModeConfig,
+  sliceObject,
   splitCurrencies,
-  handleErrorResponse,
-  convertCurrencyToISO4217
 };

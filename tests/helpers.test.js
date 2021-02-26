@@ -1,13 +1,21 @@
-const { 
-    hasIncreasedFor,
+const {
+    convertCurrencyToISO4217,
+    getChangePercentage,
+    handleErrorResponse,
     hasDecreasedFor,
-    getChangePercentage
+    hasIncreasedFor,
+    intervalSeconds,
+    isLive,
+    makePercentage,
+    makeModeConfig,
+    sliceObject,
+    splitCurrencies,
 } = require('../src/helpers');
 
-describe('helpers', ()=>{
-    describe('hasIncreasedFor(current, initial, percent)', ()=>{
-        describe('when increased percentage reached', ()=>{
-            test('returns true', ()=>{
+describe('helpers', () => {
+    describe('hasIncreasedFor(current, initial, percent)', () => {
+        describe('when increased percentage reached', () => {
+            test('returns true', () => {
                 const initial = '0.37840';
                 const percent = '0.0250';
                 const current = initial * '1.0250';
@@ -16,10 +24,10 @@ describe('helpers', ()=>{
             });
         });
     });
-    
-    describe('hasDecreasedFor(current, initial, percent)', ()=>{
-        describe('when increased percentage reached', ()=>{
-            test('returns true', ()=>{
+
+    describe('hasDecreasedFor(current, initial, percent)', () => {
+        describe('when increased percentage reached', () => {
+            test('returns true', () => {
                 const initial = '0.37840';
                 const percent = '0.0250';
                 const current = initial * '0.9750';
@@ -29,9 +37,9 @@ describe('helpers', ()=>{
         });
     });
 
-    describe('getChangePercentage(initial, current)', ()=>{
-        describe('when current value increased', ()=>{
-            test('returns positive increased percentage', ()=>{
+    describe('getChangePercentage(initial, current)', () => {
+        describe('when current value increased', () => {
+            test('returns positive increased percentage', () => {
                 const initial = '0.37840';
                 const percent = '0.0250';
                 const current = initial * '1.0250';
