@@ -9,28 +9,28 @@ const Config = db.defaults({
       interval: intervalSeconds(3),
       buyMode: makeModeConfig(100, 5, 1.5),
       sellMode: makeModeConfig(100, 4, 1),
-      auth: { apiSecret: '', apiKey: '' }
+      auth: {}
     },
     {
       currencyPair: 'xrpeur',
       interval: intervalSeconds(3),
       buyMode: makeModeConfig(100, 5, 1.5),
       sellMode: makeModeConfig(100, 4, 1.5),
-      auth: { apiSecret: '', apiKey: '' }
+      auth: {}
     },
     {
       currencyPair: 'btceur',
       interval: intervalSeconds(3),
       buyMode: makeModeConfig(100, 5, 1),
       sellMode: makeModeConfig(100, 8, 2),
-      auth: { apiSecret: '', apiKey: '' }
+      auth: {}
     },
     {
       currencyPair: 'omgeur',
       interval: intervalSeconds(5),
       buyMode: makeModeConfig(100, 5, 1.5),
       sellMode: makeModeConfig(100, 5, 1),
-      auth: { apiSecret: '', apiKey: '' }
+      auth: {}
     }
   ]
 }).get('config');

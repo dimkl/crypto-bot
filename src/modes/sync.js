@@ -1,9 +1,7 @@
 const { appendFile } = require('fs');
 const models = require('../models');
-const { SellService, BuyService, SetupDBService } = require('../services');
+const { SellService, BuyService } = require('../services');
 const { Balance, Transaction, Price } = models;
-
-const setupDBService = new SetupDBService();
 
 async function syncPrices(currencyPair, api) {
   const [
@@ -46,12 +44,10 @@ async function syncBuyTransaction(currencyPair, api) {
 async function sync(config, api) {
   const { currencyPair } = config;
 
-  await setupDBService.process(currencyPair);
-
   const [{ liveValues, hourlyValues }] = await Promise.all([
     syncPrices(currencyPair, api),
-    syncBalance(currencyPair, api),
-    syncBuyTransaction(currencyPair, api)
+    syncBalance(currencyPair, api).catch(console.error),
+    syncBuyTransaction(currencyPair, api).catch(console.error)
   ]);
 
   await new Promise((resolve, reject) => {
@@ -77,7 +73,7 @@ module.exports = (config, api) => {
       return Promise.all([
         sellService.process(),
         buyService.process()
-      ]).catch(console.error);
+      ]);
     }).catch(console.error);
   }, interval);
 };
