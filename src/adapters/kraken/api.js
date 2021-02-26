@@ -17,6 +17,8 @@ class Api {
         this.currencyPair = convertCurrencyToISO4217(currencyPair);
     }
 
+    async initialize() { }
+
     async getToken() {
         try {
             const { result } = await this.client.api('GetWebSocketsToken');
@@ -38,12 +40,6 @@ class Api {
 
     async getHourlyValues() {
         // TODO: missing hourly values, should find a way to by pass it
-        try {
-            const { open, bid, ask, vwap } = await this.api.tickerHour({ currencyPair: this.currencyPair });
-            return { hourlyBid: bid, hourlyAsk: ask, hourlyOpen: open, hourlyVwap: vwap };
-        } catch (err) {
-            handleErrorResponse(err);
-        }
         return {};
     }
 
@@ -132,28 +128,6 @@ class Api {
     }
 
     async getUserTransactions() {
-        try {
-            const response = await this.api.userTransactions({ limit: 10 });
-
-            const [assetsKey, capitalKey] = splitCurrencies(this.currencyPair);
-
-            return response
-                .filter(t => t[getExchangeRateKey(this.currencyPair)])
-                .map(t => ({
-                    transactionId: t.id,
-                    orderId: t.order_id,
-                    transactionType: getTransactionType(t.type),
-                    capital: Math.abs(t[capitalKey]),
-                    assets: Math.abs(t[assetsKey]),
-                    feeAmount: t.fee,
-                    datetime: t.datetime,
-                    exchangeRate: t[getExchangeRateKey(this.currencyPair)],
-                    exchangeType: getExchangeType(t[capitalKey])
-                }));
-        } catch (err) {
-            handleErrorResponse(err);
-        }
-
         return [];
     }
 

@@ -166,10 +166,6 @@ class Api {
     return this.isInitialized.all;
   }
 
-  async finished() {
-    return new Promise((resolve, reject) => { });
-  }
-
   static getInstance(options) {
     const { apikey, apiSecret } = options;
     const cacheKey = [apikey, apiSecret].filter(Boolean).join('-');

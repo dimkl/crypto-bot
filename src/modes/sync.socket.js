@@ -12,7 +12,6 @@ async function syncPrices(currencyPair, liveValues, hourlyValues) {
 }
 
 async function syncBalance(currencyPair, accountBalance) {
-  console.log({ accountBalance })
   Balance
     .find({ currencyPair })
     .assign(accountBalance)
@@ -41,8 +40,6 @@ async function sync(config, api) {
   await api.getUserTransactions(syncBuyTransaction.bind(null, currencyPair));
 
   await api.getLiveValues(async (_) => {
-    console.log(currencyPair, 'syncing socket:', new Date());
-
     try {
       await Promise.all([
         sellService.process(),
@@ -54,7 +51,6 @@ async function sync(config, api) {
   });
 
   await api.initialize();
-  await api.finished();
 }
 
 module.exports = sync;

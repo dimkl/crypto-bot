@@ -13,9 +13,7 @@ class Api {
         this.currencyPair = currencyPair;
     }
 
-    async initialized() {
-        return true;
-    }
+    async initialize() { }
 
     async getLiveValues() {
         try {
