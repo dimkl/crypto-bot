@@ -1,3 +1,4 @@
+const get = require('lodash.get');
 const {
   getExchangeRateKey,
   getTransactionType,
@@ -70,15 +71,23 @@ class KrakenMapper {
   }
 
   sell(data) {
-    // TODO: implement
-    const { id: orderId, datetime, price, amount } = data;
-    return { orderId, soldAt: datetime, soldValue: price, soldAmount: amount };
+    const orderId = data.txid.join('');
+
+    const orderInfo = get(data, 'descr.order', '');
+    const soldValue = (orderInfo.match(/\@ limit ([\.\d]+)/) || [])[1];
+    const soldAmount = (orderInfo.match(/^sell ([\.\d]+) /) || [])[1];
+
+    return { orderId, soldValue, soldAmount, soldAt: Date.now() };
   }
 
   buy(data) {
-    // TODO: implement
-    const { id: orderId, datetime, price, amount } = data;
-    return { orderId, boughtAt: datetime, boughtValue: price, boughtAmount: amount };
+    const orderId = data.txid.join('');
+
+    const orderInfo = get(data, 'descr.order', '');
+    const boughtValue = (orderInfo.match(/\@ limit ([\.\d]+)/) || [])[1];
+    const boughtAmount = (orderInfo.match(/^buy ([\.\d]+) /) || [])[1];
+
+    return { orderId, boughtValue, boughtAmount, boughtAt: Date.now() };
   }
 
   userTransactions(data) {

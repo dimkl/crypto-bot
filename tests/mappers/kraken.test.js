@@ -67,4 +67,40 @@ describe('KrakenMapper(options)', () => {
       });
     });
   });
+
+  describe('sell(limitValue, assets)', () => {
+    test('returns mapped data', () => {
+      const data = {
+        descr: { order: 'sell 20.00000000 XRPEUR @ limit 0.60000' },
+        txid: ['O4T556-LSPCF-JNWZPH']
+      };
+      const mockedNow = Date.now();
+      jest.spyOn(Date, 'now').mockReturnValueOnce(mockedNow);
+
+      expect(this.mapper.sell(data)).toMatchObject({
+        orderId: 'O4T556-LSPCF-JNWZPH',
+        soldAt: mockedNow,
+        soldValue: '0.60000',
+        soldAmount: '20.00000000'
+      })
+    })
+  });
+
+  describe('buy(limitValue, assets)', () => {
+    test('returns mapped data', () => {
+      const data = {
+        descr: { order: 'buy 20.00000000 XRPEUR @ limit 0.60000' },
+        txid: ['O4T556-LSPCF-JNWZPH']
+      };
+      const mockedNow = Date.now();
+      jest.spyOn(Date, 'now').mockReturnValueOnce(mockedNow);
+
+      expect(this.mapper.buy(data)).toMatchObject({
+        orderId: 'O4T556-LSPCF-JNWZPH',
+        boughtAt: mockedNow,
+        boughtValue: '0.60000',
+        boughtAmount: '20.00000000'
+      })
+    })
+  });
 });
