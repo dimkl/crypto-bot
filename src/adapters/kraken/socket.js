@@ -26,7 +26,6 @@ class Api {
     this.privateMessages = {};
     this.handlers = {};
     this.channels = {};
-    this.isInitialized = {};
   }
 
   _publicMessage(channel, params = {}) {
@@ -97,7 +96,6 @@ class Api {
 
   async _initializeClient(client, messages, isPublic = true) {
     if (Object.keys(messages).length == 0) return;
-    if (this.isInitialized[client.url]) return this.isInitialized[client.url];
 
     client.on('message', this._handleMessage.bind(this, isPublic));
     client.on('close', (event) => {
@@ -105,15 +103,13 @@ class Api {
       client = null;
     });
 
-    this.isInitialized[client.url] = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       client.on('open', (_) => {
         Object.values(messages).map(m => client.send(m));
         resolve();
       });
       client.on('error', reject);
     });
-
-    return this.isInitialized[client.url];
   }
 
   async getLiveValues(callback) {
@@ -153,17 +149,17 @@ class Api {
   }
 
   async initialize() {
-    if (this.isInitialized.all) return this.isInitialized.all;
+    if (this.isInitialized) return this.isInitialized;
 
     const publicClient = new WebSocket.Client("wss://ws.kraken.com");
     const privateClient = new WebSocket.Client("wss://ws-auth.kraken.com");
 
-    this.isInitialized.all = Promise.all([
+    this.isInitialized = Promise.all([
       this._initializeClient(publicClient, this.messages),
       this._initializeClient(privateClient, this.privateMessages, false),
     ]);
 
-    return this.isInitialized.all;
+    return this.isInitialized;
   }
 
   static getInstance(options) {

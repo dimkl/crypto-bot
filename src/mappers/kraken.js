@@ -78,7 +78,7 @@ class KrakenMapper {
   buy(data) {
     // TODO: implement
     const { id: orderId, datetime, price, amount } = data;
-    return { orderId, boughtAt: datetime, boughtValue: price, boughtAmount: amount }
+    return { orderId, boughtAt: datetime, boughtValue: price, boughtAmount: amount };
   }
 
   userTransactions(data) {

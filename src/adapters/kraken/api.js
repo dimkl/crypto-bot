@@ -46,7 +46,7 @@ class Api {
     async getAccountBalance() {
         try {
             const response = await this.client.api('Balance');
-            return this.mapper.accountBalance(response.result)
+            return this.mapper.accountBalance(response.result);
         } catch (err) {
             handleErrorResponse(err);
         }
@@ -72,8 +72,9 @@ class Api {
             price2 = secondary price (optional.  dependent upon ordertype)
             volume = order volume in lots
             */
-            const body = { volume: assets, price: limitValue, type: 'sell', ordertype: 'limit' };
-            const response = await this.cleint.addOrder({ pair: this.currencyPair, ...body });
+           const body = { pair: this.currencyPair, volume: assets, price: limitValue, type: 'sell', ordertype: 'limit' };
+           const response = await this.client.api('AddOrder', body);
+           return this.mapper.sell(response.result);
             /*
             descr = order description info
             order = order description
@@ -109,8 +110,9 @@ class Api {
             price2 = secondary price (optional.  dependent upon ordertype)
             volume = order volume in lots
             */
-            const body = { volume: assets, price: limitValue, type: 'buy', ordertype: 'limit' };
-            const response = await this.cleint.addOrder({ pair: this.currencyPair, ...body });
+            const body = { pair: this.currencyPair, volume: assets, price: limitValue, type: 'buy', ordertype: 'limit' };
+            const response = await this.client.api('AddOrder', body);
+            return this.mapper.buy(response.result);
             /*
             descr = order description info
             order = order description
