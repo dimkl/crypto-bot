@@ -17,6 +17,31 @@ class Api {
         this.currencyPair = convertCurrencyToISO4217(currencyPair);
     }
 
+    async _addLimitOrder(limitValue, assets, type) {
+        try {
+            /*
+            pair = asset pair
+            type = type of order (buy/sell)
+            ordertype = order type:
+                market
+                limit (price = limit price)
+                stop-loss (price = stop loss price)
+                take-profit (price = take profit price)
+                stop-loss-limit (price = stop loss trigger price, price2 = triggered limit price)
+                take-profit-limit (price = take profit trigger price, price2 = triggered limit price)
+                settle-position
+            price = price (optional.  dependent upon ordertype)
+            price2 = secondary price (optional.  dependent upon ordertype)
+            volume = order volume in lots
+            */
+            const body = { pair: this.currencyPair, volume: assets, price: limitValue, type, ordertype: 'limit' };
+            const response = await this.client.api('AddOrder', body);
+            return this.mapper.sell(response.result);
+        } catch (err) {
+            handleErrorResponse(err);
+        }
+    }
+
     async initialize() { }
 
     async getToken() {
@@ -39,7 +64,7 @@ class Api {
     }
 
     async getHourlyValues() {
-        // TODO: missing hourly values, should find a way to by pass it
+        // TODO: implement
         return {};
     }
 
@@ -56,80 +81,21 @@ class Api {
     async sell(limitValue, assets) {
         const defaultResponse = { soldAt: Date.now(), soldValue: limitValue, soldAmount: assets };
 
-        try {
-            /*
-            pair = asset pair
-            type = type of order (buy/sell)
-            ordertype = order type:
-                market
-                limit (price = limit price)
-                stop-loss (price = stop loss price)
-                take-profit (price = take profit price)
-                stop-loss-limit (price = stop loss trigger price, price2 = triggered limit price)
-                take-profit-limit (price = take profit trigger price, price2 = triggered limit price)
-                settle-position
-            price = price (optional.  dependent upon ordertype)
-            price2 = secondary price (optional.  dependent upon ordertype)
-            volume = order volume in lots
-            */
-           const body = { pair: this.currencyPair, volume: assets, price: limitValue, type: 'sell', ordertype: 'limit' };
-           const response = await this.client.api('AddOrder', body);
-           return this.mapper.sell(response.result);
-            /*
-            descr = order description info
-            order = order description
-            close = conditional close order description (if conditional close set)
-            txid = array of transaction ids for order (if order was added successfully)
-            */
-            return {};
-            // const { id: orderId, datetime, price, amount } = response;
-            // return { orderId, soldAt: datetime, soldValue: price, soldAmount: amount };
-        } catch (err) {
-            handleErrorResponse(err);
-        }
+        const response = await this._addLimitOrder(limitValue, assets, 'sell');
 
-        return defaultResponse;
+        return response || defaultResponse;
     }
 
     async buy(limitValue, assets) {
         const defaultResponse = { boughtAt: Date.now(), boughtValue: limitValue, boughtAmount: assets };
 
-        try {
-            /*
-            pair = asset pair
-            type = type of order (buy/sell)
-            ordertype = order type:
-                market
-                limit (price = limit price)
-                stop-loss (price = stop loss price)
-                take-profit (price = take profit price)
-                stop-loss-limit (price = stop loss trigger price, price2 = triggered limit price)
-                take-profit-limit (price = take profit trigger price, price2 = triggered limit price)
-                settle-position
-            price = price (optional.  dependent upon ordertype)
-            price2 = secondary price (optional.  dependent upon ordertype)
-            volume = order volume in lots
-            */
-            const body = { pair: this.currencyPair, volume: assets, price: limitValue, type: 'buy', ordertype: 'limit' };
-            const response = await this.client.api('AddOrder', body);
-            return this.mapper.buy(response.result);
-            /*
-            descr = order description info
-            order = order description
-            close = conditional close order description (if conditional close set)
-            txid = array of transaction ids for order (if order was added successfully)
-            */
-            return {};
-            // const { id: orderId, datetime, price, amount } = response;
-            // return { orderId, boughtAt: datetime, boughtValue: price, boughtAmount: amount }
-        } catch (err) {
-            handleErrorResponse(err);
-        }
+        const response = await this._addLimitOrder(limitValue, assets, 'buy');
 
-        return defaultResponse;
+        return response || defaultResponse;
     }
 
     async getUserTransactions() {
+        // TODO: implement
         return [];
     }
 

@@ -19,15 +19,11 @@ class SellService {
 
     if (!isValueRising || !lastBoughtBid || !hasAssets) return false;
 
-    // TODO: fix this, there seems to be an issue in bitstamp causing by the rounding
-    // and we cannot sell the whole amount of assets
     const tradeableAssets = tradePercentage * assets;
     const {
       assets: assetsToSell,
       value: valueToSell
     } = improveSellOffer(currentAsk, tradeableAssets);
-
-    // TODO: consider using the hourlyAsk
 
     if (!hasEnoughToTrade(valueToSell, assetsToSell)) return false;
 
