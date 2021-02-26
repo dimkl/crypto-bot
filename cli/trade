@@ -1,0 +1,45 @@
+#!/usr/bin/env node
+const dotenv = require('dotenv');
+dotenv.config();
+
+const yargs = require('yargs/yargs')
+const { hideBin } = require('yargs/helpers')
+const { Config } = require('../src/models');
+const { syncMode, syncSocketMode } = require('../src/modes');
+const { SetupDBService } = require('../src/services');
+
+
+const argv = yargs(hideBin(process.argv))
+  .usage('Usage: $0 -a [adapter] -c <currencyPairs...> -s')
+  .demandOption(['a', 'c'])
+  .option('currencyPairs', {
+    alias: 'c',
+    describe: 'a list of currencyPairs to do something with'
+  })
+  .option('adapter', {
+    alias: 'a',
+    describe: 'a list of adapters to do something with',
+    choices: ['kraken', 'bitstamp']
+  })
+  .option('socket', {
+    alias: 's',
+    type: 'boolean',
+    description: 'Run socket adapter'
+  })
+  .array('currencyPairs')
+  .help()
+  .argv;
+
+const adapter = argv.socket ? argv.adapter + '/socket' : argv.adapter;
+const _syncMode = argv.socket ? syncSocketMode : syncMode;
+
+const Api = require(`../src/adapters/${adapter}`);
+
+argv.currencyPairs.map(async (currencyPair) => {
+  const setupDBService = new SetupDBService();
+  await setupDBService.process(currencyPair);
+
+  const config = Config.find({ currencyPair }).value() || {};
+  const api = Api.getInstance({ currencyPair, ...config.auth });
+  _syncMode(config, api);
+})

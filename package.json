@@ -4,9 +4,9 @@
   "description": "Automatic trading crypto bot",
   "main": "src/index.js",
   "scripts": {
-    "start": "node -r dotenv/config src/index.js",
-    "start:dev": "NODE_ENV=development node -r dotenv/config src/index.js",
-    "start:debug": "node inspect -r dotenv/config src/index.js",
+    "start": "cli/trade -s -a kraken -c xlmeur xrpeur",
+    "start:dev": "NODE_ENV=development cli/trade",
+    "start:debug": "node inspect cli/trade",
     "test": "jest --coverage"
   },
   "repository": {
@@ -33,7 +33,8 @@
     "got": "^11.8.1",
     "kraken-api": "^1.0.1",
     "lowdb": "^1.0.0",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "yargs": "^16.2.0"
   },
   "devDependencies": {
     "dotenv": "^8.2.0",
