@@ -18,10 +18,11 @@ async function syncBalance(currencyPair, accountBalance) {
     .write();
 }
 
-async function syncBuyTransaction(currencyPair, buyTransaction) {
+async function syncBuyTransaction(currencyPair, buyTransactions) {
+  const lastBuyTrx = buyTransactions.filter(t => t.exchangeType == 'buy').shift();
   Transaction
     .find({ currencyPair })
-    .assign({ type: 'buy', ...buyTransaction })
+    .assign({ type: 'buy', ...lastBuyTrx })
     .write();
 }
 
@@ -33,12 +34,12 @@ async function sync(config, api) {
 
   await setupDBService.process(currencyPair);
 
-  api.getLiveValues(syncPrices.bind(null, currencyPair));
-  api.getHourlyValues(syncPrices.bind(null, currencyPair, null));
-  // api.getAccountBalance(syncBalance.bind(null, currencyPair));
-  // api.getUserLastBuyTransaction(syncBuyTransaction(null, currencyPair));
+  await api.getLiveValues(syncPrices.bind(null, currencyPair));
+  await api.getHourlyValues(syncPrices.bind(null, currencyPair, null));
+  // await api.getAccountBalance(syncBalance.bind(null, currencyPair));
+  await api.getUserTransactions(syncBuyTransaction.bind(null, currencyPair));
 
-  api.getLiveValues(async (_) => {
+  await api.getLiveValues(async (_) => {
     console.log(currencyPair, 'syncing socket:', new Date());
 
     try {
@@ -51,7 +52,7 @@ async function sync(config, api) {
     }
   });
 
-  await api.initialized();
+  await api.initialize();
   await api.finished();
 }
 
