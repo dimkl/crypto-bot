@@ -1,9 +1,9 @@
-function makePercentage(n) {
-  return (n / 100).toFixed(4);
+function makePercentage(number) {
+  return (number / 100).toFixed(4);
 }
 
-function intervalSeconds(s) {
-  return s * 1000;
+function intervalSeconds(seconds) {
+  return seconds * 1000;
 }
 
 function sliceObject(obj, keys) {
@@ -26,7 +26,7 @@ function hasDecreasedFor(current, initial, percent) {
 }
 
 function isLive() {
-  return !["test", "development"].includes(process.env.NODE_ENV)
+  return ['', 'production'].includes(process.env.NODE_ENV || '')
 }
 
 function makeModeConfig(trade, change, comeback) {
