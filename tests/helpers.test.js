@@ -39,10 +39,10 @@ describe('helpers', () => {
         });
 
         describe('when current value decreased', () => {
-            test.skip('returns negative decreased percentage', () => {
-                const current = '0.3784';
+            test('returns negative decreased percentage', () => {
+                const initial = '0.3784';
                 const percent = '-0.0250';
-                const initial = current * '1.0250';
+                const current = initial * '0.9750';
 
                 expect(getChangePercentage(initial, current)).toEqual(percent);
             });
