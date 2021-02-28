@@ -11,8 +11,14 @@ const {
     sliceObject,
     splitCurrencies,
 } = require('../src/helpers');
+const { TimeoutError } = require('got');
 
 describe('helpers', () => {
+    beforeAll(() => {
+        console.log = jest.fn();
+        console.error = jest.fn();
+    });
+
     describe('convertCurrencyToISO4217(currencyPair)', () => {
         test('converts currencyPair to upper case and adds / between currencies', () => {
             expect(convertCurrencyToISO4217('xlmeur')).toBe('XLM/EUR');
@@ -55,8 +61,63 @@ describe('helpers', () => {
         });
     });
 
-    describe.skip('handleErrorResponse(err)', () => {
+    describe('handleErrorResponse(err)', () => {
+        beforeEach(() => {
+            this.consoleLogSpy = jest.spyOn(console, 'log');
+            this.consoleErrorSpy = jest.spyOn(console, 'error');
+        });
 
+        afterEach(() => {
+            jest.clearAllMocks();
+        })
+
+        describe('when error is timeout error', () => {
+            test('logs requestUrl and timings', () => {
+                const timings = { start: 1, end: 2 };
+                const requestUrl = 'http://example.com';
+                const err = new TimeoutError(
+                    new Error(),
+                    timings,
+                    null
+                );
+                err.request = { requestUrl };
+
+                expect(handleErrorResponse(err)).toBeUndefined();
+                expect(this.consoleErrorSpy).not.toBeCalled();
+                expect(this.consoleLogSpy).toBeCalledTimes(1);
+                expect(this.consoleLogSpy).toBeCalledWith({
+                    timings: JSON.stringify(timings),
+                    requestUrl
+                });
+            });
+        });
+
+        describe('when error response has status code', () => {
+            test('logs requestUrl, statusCode, body', () => {
+                const requestUrl = 'http://example.com';
+                const err = new Error('error');
+                err.request = { requestUrl };
+                err.response = { statusCode: 500, body: 'Server Error' };
+
+                expect(handleErrorResponse(err)).toBeUndefined();
+                expect(this.consoleErrorSpy).not.toBeCalled();
+                expect(this.consoleLogSpy).toBeCalledTimes(1);
+                expect(this.consoleLogSpy).toBeCalledWith({
+                    requestUrl,
+                    statusCode: 500,
+                    body: 'Server Error'
+                });
+            });
+        });
+
+        test('logs error', () => {
+            const err = new Error('Something went wrong');
+
+            expect(handleErrorResponse(err)).toBeUndefined();
+            expect(this.consoleLogSpy).not.toBeCalled();
+            expect(this.consoleErrorSpy).toBeCalledTimes(1);
+            expect(this.consoleErrorSpy).toBeCalledWith(err);
+        });
     });
 
     describe('hasDecreasedFor(current, initial, percent)', () => {

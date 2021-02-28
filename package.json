@@ -7,7 +7,8 @@
     "start": "cli/trade -s -a kraken -c xlmeur xrpeur",
     "start:dev": "NODE_ENV=development cli/trade",
     "start:debug": "node inspect cli/trade",
-    "test": "jest --coverage"
+    "test": "jest --coverage",
+    "test:cld": "node inspect node_modules/.bin/jest --coverage"
   },
   "repository": {
     "type": "git",

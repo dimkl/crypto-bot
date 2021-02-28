@@ -45,10 +45,11 @@ function splitCurrencies(currencyPair) {
   return [currencyPair.slice(0, 3), currencyPair.slice(3)];
 }
 
-async function handleErrorResponse(err) {
+function handleErrorResponse(err) {
   const { statusCode, body } = err.response || {};
   const { requestUrl } = err.request || {};
-  if (err.message.includes('Timeout')) {
+
+  if (err.name.includes('Timeout')) {
     console.log({ requestUrl, timings: JSON.stringify(err.timings) });
   } else if (statusCode) {
     console.log({ requestUrl, statusCode, body });
