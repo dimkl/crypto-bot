@@ -23,8 +23,8 @@ class BitstampMapper {
     return mapping[type];
   }
 
-  _getExchangeType(capital) {
-    return capital > 0 ? 'sell' : 'buy';
+  _getExchangeType(assets) {
+    return assets < 0 ? 'sell' : 'buy';
   }
 
   liveValues(data) {
@@ -72,7 +72,7 @@ class BitstampMapper {
         feeAmount: t.fee,
         datetime: t.datetime,
         exchangeRate: t[this.exchangeRateKey],
-        exchangeType: this._getExchangeType(t[capitalKey])
+        exchangeType: this._getExchangeType(t[assetsKey])
       }));
   }
 }
