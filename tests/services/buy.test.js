@@ -3,59 +3,66 @@ const BuyService = require("../../src/services/buy");
 
 const currencyPair = "xlmeur";
 
-
 function getState() {
   return State.find({ currencyPair, mode: "buy" }).value();
 }
 
-describe("buy mode", () => {
+describe("BuyService", () => {
+  beforeAll(() => {
+    console.log = jest.fn();
+  });
+
   beforeEach(() => {
     Balance.remove({ currencyPair }).write();
     Price.remove({ currencyPair }).write();
     State.remove({ currencyPair }).write();
     AuditLog.remove({ currencyPair, mode: 'buy' }).write();
-
-    console.log = jest.fn();
   });
 
-  test("buy: when value dropping, updates buying state with min value until comeback decrease from latest value", async () => {
-    Balance.push({ currencyPair, capital: "26.50", assets: 0 }).write();
-    Price.push({ currencyPair }).write();
-    State.push({ currencyPair, mode: "buy" }).write();
+  describe('when value is dropping', () => {
+    describe('and change percentage has been reached', () => {
+      describe('and comeback percentage has been reached', () => {
+        test("sends buy limit order request and creates audit log", async () => {
+          Balance.push({ currencyPair, capital: "26.50", assets: 0 }).write();
+          Price.push({ currencyPair }).write();
+          State.push({ currencyPair, mode: "buy" }).write();
 
-    const data = require('./xmleur.json');
-    const config = {
-      changePercentage: "0.0500",
-      comebackPercentage: "0.0100",
-      tradePercentage: "1.0000"
-    };
+          const data = require('./xmleur.json');
+          const config = {
+            changePercentage: "0.0500",
+            comebackPercentage: "0.0100",
+            tradePercentage: "1.0000"
+          };
 
-    const api = {
-      buy: jest.fn((limitValue, assets) => {
-        return { boughtAt: Date.now(), boughtValue: limitValue, boughtAmount: assets };
-      })
-    };
-    const service = new BuyService({ currencyPair, ...config }, api);
+          const api = {
+            buy: jest.fn((limitValue, assets) => {
+              return { boughtAt: Date.now(), boughtValue: limitValue, boughtAmount: assets };
+            })
+          };
+          const service = new BuyService({ currencyPair, ...config }, api);
 
-    for (const dt of data) {
-      Price.find({ currencyPair }).assign(dt).write();
-      await service.process();
+          for (const dt of data) {
+            Price.find({ currencyPair }).assign(dt).write();
+            await service.process();
 
-      // end buying
-      if (getState().final) Balance.find({ currencyPair }).assign({ capital: 0 }).write();
-    }
+            // end buying
+            if (getState().final) Balance.find({ currencyPair }).assign({ capital: 0 }).write();
+          }
 
-    const state = getState();
-    expect(state.current).toBeNull();
-    expect(state.final).toBe("0.30751");
-    const auditLog = AuditLog.find({ currencyPair, mode: "buy" }).value();
-    expect(auditLog).toMatchObject({
-      createdAt: expect.anything(),
-      amount: "86.1768",
-      currencyPair: "xlmeur",
-      mode: "buy",
-      value: "0.30751"
+          const state = getState();
+          expect(state.current).toBeNull();
+          expect(state.final).toBe("0.30751");
+          const auditLog = AuditLog.find({ currencyPair, mode: "buy" }).value();
+          expect(auditLog).toMatchObject({
+            createdAt: expect.anything(),
+            amount: "86.1768",
+            currencyPair: "xlmeur",
+            mode: "buy",
+            value: "0.30751"
+          });
+        });
+      });
     });
-  })
+  });
 });
 
