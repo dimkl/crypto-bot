@@ -66,7 +66,7 @@ class KrakenMapper {
   }
 
   sell(data) {
-    const orderId = data.txid.join('');
+    const orderId = (data.txid || []).join('');
 
     const orderInfo = get(data, 'descr.order', '');
     const soldValue = (orderInfo.match(/\@ limit ([\.\d]+)/) || [])[1];
@@ -76,7 +76,7 @@ class KrakenMapper {
   }
 
   buy(data) {
-    const orderId = data.txid.join('');
+    const orderId = (data.txid || []).join('');
 
     const orderInfo = get(data, 'descr.order', '');
     const boughtValue = (orderInfo.match(/\@ limit ([\.\d]+)/) || [])[1];

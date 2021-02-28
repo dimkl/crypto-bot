@@ -83,7 +83,22 @@ describe('KrakenMapper(options)', () => {
         soldValue: '0.60000',
         soldAmount: '20.00000000'
       })
-    })
+    });
+
+    describe('when order info is not valid', () => {
+      test('returns empty data', () => {
+        const data = {};
+        const mockedNow = Date.now();
+        jest.spyOn(Date, 'now').mockReturnValueOnce(mockedNow);
+
+        expect(this.mapper.sell(data)).toMatchObject({
+          orderId: '',
+          soldAt: mockedNow,
+          soldValue: undefined,
+          soldAmount: undefined
+        })
+      });
+    });
   });
 
   describe('buy(data)', () => {
@@ -100,8 +115,23 @@ describe('KrakenMapper(options)', () => {
         boughtAt: mockedNow,
         boughtValue: '0.60000',
         boughtAmount: '20.00000000'
-      })
-    })
+      });
+    });
+
+    describe('when order info is not valid', () => {
+      test('returns empty data', () => {
+        const data = {};
+        const mockedNow = Date.now();
+        jest.spyOn(Date, 'now').mockReturnValueOnce(mockedNow);
+
+        expect(this.mapper.buy(data)).toMatchObject({
+          orderId: '',
+          boughtAt: mockedNow,
+          boughtValue: undefined,
+          boughtAmount: undefined
+        });
+      });
+    });
   });
 
   describe('userTransactions(data)', () => {
