@@ -113,8 +113,10 @@ class Api {
   }
 
   async getLiveValues(callback) {
-    const tickerMessage = this._publicMessage('ticker');
-    this.messages['ticker'] = JSON.stringify(tickerMessage);
+    if (!this.messages['ticker']) {
+      const tickerMessage = this._publicMessage('ticker');
+      this.messages['ticker'] = JSON.stringify(tickerMessage);
+    }
 
     this.handlers['ticker'] = this.handlers['ticker'] || [];
     this.handlers['ticker'].push(callback);
@@ -123,8 +125,10 @@ class Api {
   }
 
   async getHourlyValues(callback) {
-    const ohlcMessage = this._publicMessage('ohlc', { interval: 60 });
-    this.messages['ohlc-60'] = JSON.stringify(ohlcMessage);
+    if (!this.messages['ohlc-60']) {
+      const ohlcMessage = this._publicMessage('ohlc', { interval: 60 });
+      this.messages['ohlc-60'] = JSON.stringify(ohlcMessage);
+    }
 
     this.handlers['ohlc-60'] = this.handlers['ohlc-60'] || [];
     this.handlers['ohlc-60'].push(callback);
@@ -136,16 +140,27 @@ class Api {
   }
 
   async getUserTransactions(callback) {
-    const token = await this.restClient.getToken();
-    const ownTradesMessage = this._privateMessage('ownTrades', token);
-    this.privateMessages['ownTrades'] = JSON.stringify(ownTradesMessage);
+    if (!this.privateMessages['ownTrades']) {
+      const token = await this.restClient.getToken();
+      const ownTradesMessage = this._privateMessage('ownTrades', token);
+      this.privateMessages['ownTrades'] = JSON.stringify(ownTradesMessage);
+    }
 
     this.handlers['ownTrades'] = this.handlers['ownTrades'] || [];
     this.handlers['ownTrades'].push(callback);
   }
 
   async getUserLastBuyTransaction(callback) {
-    // TODO: check if i should even implement it
+    if (!this.privateMessages['ownTrades']) {
+      const token = await this.restClient.getToken();
+      const ownTradesMessage = this._privateMessage('ownTrades', token);
+      this.privateMessages['ownTrades'] = JSON.stringify(ownTradesMessage);
+    }
+
+    this.handlers['ownTrades'] = this.handlers['ownTrades'] || [];
+    this.handlers['ownTrades'].push((data) => {
+      return callback(data.shift());
+    });
   }
 
   async initialize() {
