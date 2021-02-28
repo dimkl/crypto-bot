@@ -50,10 +50,6 @@ function improveBuyOffer(value, assets) {
   };
 }
 
-function hasEnoughToBuy(value) {
-  return value >= 25;
-}
-
 module.exports = {
   markSelling,
   markSold,
@@ -61,6 +57,5 @@ module.exports = {
   markBought,
   improveSellOffer,
   hasEnoughToTrade,
-  improveBuyOffer,
-  hasEnoughToBuy
+  improveBuyOffer
 };

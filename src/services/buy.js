@@ -54,7 +54,7 @@ class BuyService {
     const recoveryReached = hasIncreasedFor(currentBid, buying, comebackPercentage);
     if (buying) {
       if (recoveryReached && targetProfitReached) {
-        const { boughtValue, boughtAmount } = await this.api.buy(valueToBuy, assetsToBuy, currencyPair);
+        const { boughtValue, boughtAmount } = await this.api.buy(valueToBuy, assetsToBuy);
         await markBought(currencyPair, boughtValue, boughtAmount);
       } else if (bidHasDropped) {
         await markBuying(currencyPair, currentBid, assetsToBuy);
