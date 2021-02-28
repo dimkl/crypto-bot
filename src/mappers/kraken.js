@@ -86,19 +86,19 @@ class KrakenMapper {
   }
 
   userTransactions(data) {
-    // TODO: implement
     return data
-      // .filter(t => t[getExchangeRateKey(this.currencyPair)])
+      .map(t => Object.values(t).shift())
+      .filter(t => t.pair == this.currencyPair)
       .map(t => ({
-        transactionId: '',
-        orderId: '',
-        transactionType: '',
-        capital: '',
-        assets: '',
-        feeAmount: '',
-        datetime: '',
-        exchangeRate: '',
-        exchangeType: ''
+        transactionId: t.postxid,
+        orderId: t.ordertxid,
+        transactionType: 'market_trade',
+        capital: t.cost,
+        assets: t.vol,
+        feeAmount: t.fee,
+        datetime: (new Date(t.time * 1000)).toISOString(),
+        exchangeRate: t.price,
+        exchangeType: t.type
       }));
   }
 }

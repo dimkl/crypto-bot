@@ -103,4 +103,12 @@ describe('KrakenMapper(options)', () => {
       })
     })
   });
+
+  describe('userTransactions(data)', () => {
+    test('returns mapped data', () => {
+      const data = require('../__fixtures__/kraken/userTransactions.json')
+
+      expect(this.mapper.userTransactions(data)).toMatchSnapshot();
+    });
+  });
 });

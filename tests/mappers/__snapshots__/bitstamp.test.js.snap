@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`BitstampMapper(options) userTransactions(data) returns mapped data 1`] = `
+Array [
+  Object {
+    "assets": 0.0000048,
+    "capital": 0,
+    "datetime": "2021-02-13 02:03:57.546000",
+    "exchangeRate": 0.477,
+    "exchangeType": "sell",
+    "feeAmount": "0.00000",
+    "orderId": 1328524713971714,
+    "transactionId": 150706592,
+    "transactionType": "market_trade",
+  },
+  Object {
+    "assets": 461.0838,
+    "capital": 219.93697,
+    "datetime": "2021-02-13 02:03:49.523000",
+    "exchangeRate": 0.477,
+    "exchangeType": "sell",
+    "feeAmount": "1.09968",
+    "orderId": 1328524713971714,
+    "transactionId": 150706570,
+    "transactionType": "market_trade",
+  },
+]
+`;
