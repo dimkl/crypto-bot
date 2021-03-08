@@ -1,7 +1,6 @@
 const get = require('lodash.get');
 const { makePercentage, splitCurrencies, convertCurrencyToISO4217 } = require('../helpers');
 
-
 class KrakenMapper {
   constructor(options) {
     const { currencyPair } = options;
@@ -61,7 +60,7 @@ class KrakenMapper {
     return {
       assets: data['X' + assetKey],
       capital: data['Z' + capitalKey],
-      feePercentage: makePercentage(0)
+      feePercentage: makePercentage(0.16)
     };
   }
 
