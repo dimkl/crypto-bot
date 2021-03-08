@@ -163,6 +163,14 @@ class Api {
     });
   }
 
+  async buy(limitValue, assets) {
+    return this.restClient.buy(limitValue, assets);
+  }
+
+  async sell(limitValue, assets) {
+    return this.restClient.sell(limitValue, assets);
+  }
+
   async initialize() {
     if (this.isInitialized) return this.isInitialized;
 
