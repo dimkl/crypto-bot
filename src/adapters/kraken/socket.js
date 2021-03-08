@@ -18,7 +18,7 @@ class Api {
   constructor(options) {
     const { currencyPair } = options;
 
-    this.restClient = RestApi.getInstance(options);
+    this.restClient = RestApi.getInstance({ ...options, cacheTTL: 10000 });
     this.mapper = new KrakenMapper(options);
 
     this.currencyPair = convertCurrencyToISO4217(currencyPair);

@@ -1,20 +1,25 @@
 const KrakenClient = require('kraken-api');
 const { handleErrorResponse, convertCurrencyToISO4217 } = require('../../helpers');
 const KrakenMapper = require('../../mappers/kraken');
+const Keyv = require('keyv');
 
 const apiCache = {};
+const cache = new Keyv();
+
 const API_KEY = process.env.KRAKEN_API_KEY;
 const API_SECRET = process.env.KRAKEN_API_SECRET;
 
 class Api {
     constructor(options) {
-        const { currencyPair } = options;
+        const { currencyPair, cacheTTL = false } = options;
         const { apiKey = API_KEY, apiSecret = API_SECRET } = options;
 
         this.mapper = new KrakenMapper(options);
 
         this.client = new KrakenClient(apiKey, apiSecret);
         this.currencyPair = convertCurrencyToISO4217(currencyPair);
+
+        this.cacheTTL = cacheTTL;
     }
 
     async _addLimitOrder(limitValue, assets, type) {
@@ -40,6 +45,18 @@ class Api {
         } catch (err) {
             handleErrorResponse(err);
         }
+    }
+
+    async _setCached(key, value) {
+        if (!this.cacheTTL) return;
+        await cache.set(key, value, this.cacheTTL);
+
+        return;
+    }
+
+    async _getCached(key) {
+        if (!this.cacheTTL) return;
+        return cache.get(key);
     }
 
     async initialize() { }
@@ -69,9 +86,13 @@ class Api {
     }
 
     async getAccountBalance() {
+        let cached = await this._getCached('balance');
+        if (cached) return this.mapper.accountBalance(cached);
+
         try {
             const response = await this.client.api('Balance');
-            return this.mapper.accountBalance(response.result);
+            await this._setCached('balance', response.result);
+            return this.mapper.accountBalance(response.result)
         } catch (err) {
             handleErrorResponse(err);
         }
