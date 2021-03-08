@@ -4,6 +4,7 @@ const WebSocket = require('faye-websocket');
 const RestApi = require('./api');
 const KrakenMapper = require('../../mappers/kraken');
 const { convertCurrencyToISO4217 } = require('../../helpers');
+const set = require('lodash.set');
 
 const apiCache = {};
 
@@ -50,6 +51,13 @@ class Api {
     }
   }
 
+  _addTokenToMessages(messages, token) {
+    Object.values(messages).forEach(message => {
+      set(message, 'subscription.token', token)
+    });
+    return messages;
+  }
+
   _getChannelID(eventData, isPublic) {
     return isPublic ? eventData[0] : undefined;
   }
@@ -94,19 +102,28 @@ class Api {
     })
   }
 
+  async _connectClient(client, messages, isPublic = true) {
+    if (!isPublic) {
+      const token = await this.restClient.getToken();
+      messages = this._addTokenToMessages(messages, token);
+    }
+    Object.values(messages).map(m => client.send(m));
+  }
+
   async _initializeClient(client, messages, isPublic = true) {
     if (Object.keys(messages).length == 0) return;
 
     client.on('message', this._handleMessage.bind(this, isPublic));
     client.on('close', (event) => {
-      console.log('close', event.code, event.reason);
-      client = null;
+      console.log('close', this.currencyPair, event.code, event.reason);
+      // reconnect
+      console.log('reconnect!');
+      this._connectClient(client, messages, isPublic);
     });
 
     return new Promise((resolve, reject) => {
       client.on('open', (_) => {
-        Object.values(messages).map(m => client.send(m));
-        resolve();
+        this._connectClient(client, messages, isPublic).then(() => resolve());
       });
       client.on('error', reject);
     });
@@ -141,8 +158,7 @@ class Api {
 
   async getUserTransactions(callback) {
     if (!this.privateMessages['ownTrades']) {
-      const token = await this.restClient.getToken();
-      const ownTradesMessage = this._privateMessage('ownTrades', token);
+      const ownTradesMessage = this._privateMessage('ownTrades');
       this.privateMessages['ownTrades'] = JSON.stringify(ownTradesMessage);
     }
 
@@ -152,8 +168,7 @@ class Api {
 
   async getUserLastBuyTransaction(callback) {
     if (!this.privateMessages['ownTrades']) {
-      const token = await this.restClient.getToken();
-      const ownTradesMessage = this._privateMessage('ownTrades', token);
+      const ownTradesMessage = this._privateMessage('ownTrades');
       this.privateMessages['ownTrades'] = JSON.stringify(ownTradesMessage);
     }
 
