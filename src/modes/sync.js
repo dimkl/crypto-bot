@@ -15,6 +15,7 @@ async function syncPrices(currencyPair, api) {
     .find({ currencyPair })
     .assign(liveValues)
     .assign(hourlyValues)
+    .assign({ updatedAt: new Date() })
     .write();
 
   return { liveValues, hourlyValues };

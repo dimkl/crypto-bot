@@ -7,7 +7,9 @@ const setupDBService = new SetupDBService();
 async function syncPrices(currencyPair, liveValues, hourlyValues) {
   Price
     .find({ currencyPair })
-    .assign({ ...liveValues, ...hourlyValues })
+    .assign(liveValues)
+    .assign(hourlyValues)
+    .assign({ updatedAt: new Date() })
     .write();
 }
 
