@@ -42,6 +42,11 @@ function splitCurrencies(currencyPair) {
     return currencyPair.split('/');
   }
 
+  if (currencyPair.length != 6 ) {
+    const indexOfCapital = currencyPair.length - 3;
+    return [currencyPair.slice(0, indexOfCapital), currencyPair.slice(indexOfCapital)];
+  }
+
   return [currencyPair.slice(0, 3), currencyPair.slice(3)];
 }
 
