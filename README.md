@@ -33,4 +33,3 @@ see: https://www.bitstamp.net/api/
 - [] support transactions and profit per transaction
 - [] test sell & buy api calls using nock
 - [] add buy & sell e2e flow with mock data
-- [~] kraken api & websocket
