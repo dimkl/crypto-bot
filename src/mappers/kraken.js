@@ -58,8 +58,8 @@ class KrakenMapper {
     const [assetKey, capitalKey] = splitCurrencies(this.currencyPair);
 
     return {
-      assets: data['X' + assetKey],
-      capital: data['Z' + capitalKey],
+      assets: data['X' + assetKey] || data[assetKey] || 0,
+      capital: data['Z' + capitalKey] || 0,
       feePercentage: makePercentage(0.16)
     };
   }
