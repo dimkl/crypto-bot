@@ -1,5 +1,5 @@
 const models = require('../models');
-const { State } = models;
+const { State, Transaction } = models;
 
 class SetupDBService {
   constructor() {
@@ -12,6 +12,14 @@ class SetupDBService {
 
   createState(currencyPair, mode) {
     State.push({ currencyPair, mode, createdAt: new Date() }).write();
+  }
+
+  transactionExists(currencyPair, mode) {
+    return !!Transaction.find({ currencyPair, mode }).value();
+  }
+
+  createTransaction(currencyPair, mode) {
+    Transaction.push({ currencyPair, mode, createdAt: new Date() }).write();
   }
 
   setupModel(Model, currencyPair) {
@@ -28,10 +36,13 @@ class SetupDBService {
       this.setupModel(Model, currencyPair)
     });
 
-    // state model setup
+    // state & transaction model setup
     ['buy', 'sell'].forEach(mode => {
       if (!this.stateExists(currencyPair, mode)) {
         this.createState(currencyPair, mode);
+      }
+      if (!this.transactionExists(currencyPair, mode)) {
+        this.createTransaction(currencyPair, mode);
       }
     });
 
