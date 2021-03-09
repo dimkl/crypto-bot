@@ -10,7 +10,7 @@ class SellService {
 
   get lastBoughtBid() {
     const { currencyPair, manualLastBoughtBid } = this.config;
-    const { exchangeRate: lastBoughtBid } = Transaction.find({ currencyPair, type: 'buy' }).value();
+    const { exchangeRate: lastBoughtBid } = Transaction.find({ currencyPair, type: 'buy' }).value() || {};
     return lastBoughtBid || manualLastBoughtBid;
   }
 
